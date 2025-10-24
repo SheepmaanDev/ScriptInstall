@@ -172,7 +172,7 @@ $programWingetInstall = @(
         packageId   = "Mozilla.Firefox.fr";
         postInstall = $null
         source      = "winget"
-    }
+    },
     @{
         name        = "IrfanView";
         packageId   = "IrfanSkiljan.IrfanView";
