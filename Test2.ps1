@@ -104,7 +104,7 @@ $localTargetsGC = @(
     "Default\Affiliation Database-journal"
 )
 
-# --- Récupération des chemins Firefox ---
+# --- Récupération des chemins ---
 $firefoxLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles" $localTargetsFF
 $firefoxRoaming = Get-BrowserTargets "$env:APPDATA\Mozilla\Firefox\Profiles" $roamingTargetsFF
 $chromeLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Google\Chrome" $localTargetsGC
