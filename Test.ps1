@@ -1,274 +1,254 @@
-# $dossiers = @(
-#     "$env:WINDIR\Temp",
-#     "$env:TEMP",
-#     "$env:WINDIR\SoftwareDistribution\Download",
-#     "$env:WINDIR\Logs\CBS",
-#     "$env:WINDIR\Prefetch",
-#     "$env:WINDIR\WinSxS\Temp",
-#     "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
-#     "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*",
-#     "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
-#     "$env:WINDIR\Downloaded Program Files",
-#     "$env:PROGRAMDATA\Microsoft\Windows\Caches"
-# )
-# $total = 0
-# function Get-FolderSize($path) {
-#     $size = 0
-#     if (Test-Path $path) {
-#         $item = Get-Item $path -Force -ErrorAction SilentlyContinue
-#         if ($item.PSIsContainer) {
-#             # Pour dossier : additionne tous les fichiers dedans
-#             $files = Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer }
-#             foreach ($file in $files) {
-#                 if ($file.Length) { $size += $file.Length }
-#             }
-#         }
-#         else {
-#             # Pour fichier
-#             $size += $item.Length
-#         }
-#     }
-#     return $size
-# }
-
-# ############################
-# # --- Firefox ---
-# $firefoxTargets = @()
-# $firefoxProfilesRoot = "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles"
-# if (Test-Path $firefoxProfilesRoot) {
-#     $firefoxProfiles = Get-ChildItem -Path $firefoxProfilesRoot -Directory
-#     foreach ($profil in $firefoxProfiles) {
-#         $profilePath = Join-Path $firefoxProfilesRoot $profil.Name
-#         $firefoxTargets += Join-Path $profilePath "cache2"
-#         $firefoxTargets += Join-Path $profilePath "startupCache"
-#         $firefoxTargets += Join-Path $profilePath "cookies.sqlite"
-#         $firefoxTargets += Join-Path $profilePath "places.sqlite"
-#         $firefoxTargets += Join-Path $profilePath "jumpListCache"
-#         $firefoxTargets += Join-Path $profilePath "offlineCache"
-#     }
-# }
-
-# ############################
-# # --- Chrome ---
-# $chromeTargets = @()
-# $chromeUserData = "$env:LOCALAPPDATA\Google\Chrome\User Data"
-# if (Test-Path $chromeUserData) {
-#     $chromeProfiles = Get-ChildItem -Path $chromeUserData -Directory | Where-Object {
-#         $_.Name -eq "Default" -or $_.Name -like "Profile *"
-#     }
-#     foreach ($profil in $chromeProfiles) {
-#         $profilePath = Join-Path $chromeUserData $profil.Name
-#         $chromeTargets += Join-Path $profilePath "Cache"
-#         $chromeTargets += Join-Path $profilePath "Cookies"
-#         $chromeTargets += Join-Path $profilePath "History"
-#         $chromeTargets += Join-Path $profilePath "Network Action Predictor"
-#         $chromeTargets += Join-Path $profilePath "Top Sites"
-#         $chromeTargets += Join-Path $profilePath "Visited Links"
-#         $chromeTargets += Join-Path $profilePath "Downloads"
-#     }
-# }
-
-# ############################
-# # --- Edge ---
-# $edgeTargets = @()
-# $edgeUserData = "$env:LOCALAPPDATA\Microsoft\Edge\User Data"
-# if (Test-Path $edgeUserData) {
-#     $edgeProfiles = Get-ChildItem -Path $edgeUserData -Directory | Where-Object {
-#         $_.Name -eq "Default" -or $_.Name -like "Profile *"
-#     }
-#     foreach ($profil in $edgeProfiles) {
-#         $profilePath = Join-Path $edgeUserData $profil.Name
-#         $edgeTargets += Join-Path $profilePath "Cache"
-#         $edgeTargets += Join-Path $profilePath "Cookies"
-#         $edgeTargets += Join-Path $profilePath "History"
-#         $edgeTargets += Join-Path $profilePath "Network Action Predictor"
-#         $edgeTargets += Join-Path $profilePath "Top Sites"
-#         $edgeTargets += Join-Path $profilePath "Visited Links"
-#         $edgeTargets += Join-Path $profilePath "Downloads"
-#     }
-# }
-
-# ############################
-# # --- Brave ---
-# $braveTargets = @()
-# $braveUserData = "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data"
-# if (Test-Path $braveUserData) {
-#     $braveProfiles = Get-ChildItem -Path $braveUserData -Directory | Where-Object {
-#         $_.Name -eq "Default" -or $_.Name -like "Profile *"
-#     }
-#     foreach ($profil in $braveProfiles) {
-#         $profilePath = Join-Path $braveUserData $profil.Name
-#         $braveTargets += Join-Path $profilePath "Cache"
-#         $braveTargets += Join-Path $profilePath "Cookies"
-#         $braveTargets += Join-Path $profilePath "History"
-#         $braveTargets += Join-Path $profilePath "Network Action Predictor"
-#         $braveTargets += Join-Path $profilePath "Top Sites"
-#         $braveTargets += Join-Path $profilePath "Visited Links"
-#         $braveTargets += Join-Path $profilePath "Downloads"
-#     }
-# }
-
-# ############################
-# # --- Vivaldi ---
-# $vivaldiTargets = @()
-# $vivaldiUserData = "$env:LOCALAPPDATA\Vivaldi\User Data"
-# if (Test-Path $vivaldiUserData) {
-#     $vivaldiProfiles = Get-ChildItem -Path $vivaldiUserData -Directory | Where-Object {
-#         $_.Name -eq "Default" -or $_.Name -like "Profile *"
-#     }
-#     foreach ($profil in $vivaldiProfiles) {
-#         $profilePath = Join-Path $vivaldiUserData $profil.Name
-#         $vivaldiTargets += Join-Path $profilePath "Cache"
-#         $vivaldiTargets += Join-Path $profilePath "Cookies"
-#         $vivaldiTargets += Join-Path $profilePath "History"
-#         $vivaldiTargets += Join-Path $profilePath "Network Action Predictor"
-#         $vivaldiTargets += Join-Path $profilePath "Top Sites"
-#         $vivaldiTargets += Join-Path $profilePath "Visited Links"
-#         $vivaldiTargets += Join-Path $profilePath "Downloads"
-#     }
-# }
-
-# ############################
-# # --- Opera ---
-# $operaTargets = @()
-# $operaUserData = "$env:APPDATA\Opera Software\Opera Stable"
-# if (Test-Path $operaUserData) {
-#     $operaTargets += Join-Path $operaUserData "Cache"
-#     $operaTargets += Join-Path $operaUserData "Cookies"
-#     $operaTargets += Join-Path $operaUserData "History"
-#     $operaTargets += Join-Path $operaUserData "Network Action Predictor"
-#     $operaTargets += Join-Path $operaUserData "Top Sites"
-#     $operaTargets += Join-Path $operaUserData "Visited Links"
-#     $operaTargets += Join-Path $operaUserData "Downloads"
-# }
-
-# ############################
-# # --- Arc Browser ---
-# $arcTargets = @()
-# $arcUserData = "$env:LOCALAPPDATA\Arc\User Data"
-# if (Test-Path $arcUserData) {
-#     $arcProfiles = Get-ChildItem -Path $arcUserData -Directory | Where-Object {
-#         $_.Name -eq "Default" -or $_.Name -like "Profile *"
-#     }
-#     foreach ($profil in $arcProfiles) {
-#         $profilePath = Join-Path $arcUserData $profil.Name
-#         $arcTargets += Join-Path $profilePath "Cache"
-#         $arcTargets += Join-Path $profilePath "Cookies"
-#         $arcTargets += Join-Path $profilePath "History"
-#         $arcTargets += Join-Path $profilePath "Network Action Predictor"
-#         $arcTargets += Join-Path $profilePath "Top Sites"
-#         $arcTargets += Join-Path $profilePath "Visited Links"
-#         $arcTargets += Join-Path $profilePath "Downloads"
-#     }
-# }
-
-# # --- Calculs & Affichage ---
-
-# function Show-TargetTotals($name, $targets, $color) {
-#     Write-Host "`n--- $name ---" -ForegroundColor $color
-#     $total = 0
-#     foreach ($target in $targets) {
-#         $size = Get-FolderSize $target
-#         $mo = "{0:N2}" -f ($size / 1MB)
-#         Write-Host "$target : $mo Mo" -ForegroundColor Cyan
-#         $total += $size
-#     }
-#     $totalMo = "{0:N2}" -f ($total / 1MB)
-#     Write-Host "------------------------------"
-#     Write-Host "Total $name : $totalMo Mo" -ForegroundColor Yellow
-#     return $total
-# }
-
-# $totals = @{}
-# $totals.Firefox = Show-TargetTotals "Firefox"  $firefoxTargets  "Green"
-# $totals.Chrome = Show-TargetTotals "Chrome"   $chromeTargets   "Green"
-# $totals.Edge = Show-TargetTotals "Edge"     $edgeTargets     "Green"
-# $totals.Brave = Show-TargetTotals "Brave"    $braveTargets    "Green"
-# $totals.Vivaldi = Show-TargetTotals "Vivaldi"  $vivaldiTargets  "Green"
-# $totals.Opera = Show-TargetTotals "Opera"    $operaTargets    "Green"
-# $totals.Arc = Show-TargetTotals "Arc"      $arcTargets      "Green"
-
-# $allTotal = ($totals.Firefox + $totals.Chrome + $totals.Edge + $totals.Brave + $totals.Vivaldi + $totals.Opera + $totals.Arc)
-# $allTotalMo = "{0:N2}" -f ($allTotal / 1MB)
-# Write-Host "------------------------------"
-# Write-Host "Total Tous Navigateurs : $allTotalMo Mo" -ForegroundColor Magenta
-# Write-Host "------------------------------"
-
-
-
-
-
-
-
-
-
-
-
-
+# ========================================
+# VERIFICATION PRIVILEGES ADMINISTRATEUR
+# ========================================
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Host "Ce script doit être exécuté en tant qu'administrateur. Redémarrage..." -ForegroundColor Yellow
+    Start-Process PowerShell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`""
+    exit
+}
+$startTime = Get-Date
+function Get-Timestamp {
+    return Get-Date -Format "[dd/MM/yy HH:mm:ss]"
+}
 function Get-FolderSize($path) {
-    $size = 0
-    if (Test-Path $path) {
-        $item = Get-Item $path -Force -ErrorAction SilentlyContinue
-        if ($item.PSIsContainer) {
-            # Pour dossier : additionne tous les fichiers dedans
-            $files = Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer }
-            foreach ($file in $files) {
-                if ($file.Length) { $size += $file.Length }
+    if (-not $path) { return 0 }
+    
+    try {
+        $resolvedPaths = @(Resolve-Path $path -ErrorAction SilentlyContinue)
+        
+        if ($resolvedPaths.Count -eq 0) { return 0 }
+        
+        $totalSize = 0
+        
+        foreach ($resolvedPath in $resolvedPaths) {
+            $item = Get-Item $resolvedPath -Force -ErrorAction SilentlyContinue
+            
+            if ($item.PSIsContainer) {
+                $size = (Get-ChildItem -Path $resolvedPath -Recurse -Force -File -ErrorAction SilentlyContinue |
+                    Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum
+                
+                if ($size) { $totalSize += $size }
+            }
+            else {
+                if ($item.Length) { $totalSize += $item.Length }
             }
         }
-        else {
-            # Pour fichier
-            $size += $item.Length
+        
+        return $totalSize
+    }
+    catch {
+        return 0
+    }
+}
+
+# Fonction pour Firefox (qui a un dossier Profiles)
+function Get-FirefoxTargets($profilesRoot, $targetPaths) {
+    if (-not (Test-Path $profilesRoot)) { return @() }
+    
+    $targets = @()
+    # Firefox: tous les dossiers dans Profiles
+    $profiles = Get-ChildItem -Path $profilesRoot -Directory -ErrorAction SilentlyContinue
+    
+    foreach ($profil in $profiles) {
+        foreach ($targetPath in $targetPaths) {
+            $targets += Join-Path $profil.FullName $targetPath
         }
     }
-    return $size
+    
+    return $targets
 }
 
-############################
-# --- Firefox ---
-$firefoxTargets = @()
-$firefoxProfilesRoot = "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles"
-if (Test-Path $firefoxProfilesRoot) {
-    $firefoxProfiles = Get-ChildItem -Path $firefoxProfilesRoot -Directory
-    foreach ($profil in $firefoxProfiles) {
-        $profilePath = Join-Path $firefoxProfilesRoot $profil.Name
-        $firefoxTargets += Join-Path $profilePath "cache2"
-        $firefoxTargets += Join-Path $profilePath "startupCache"
-        $firefoxTargets += Join-Path $profilePath "cookies.sqlite"
-        $firefoxTargets += Join-Path $profilePath "places.sqlite"
-        $firefoxTargets += Join-Path $profilePath "jumpListCache"
-        $firefoxTargets += Join-Path $profilePath "offlineCache"
+# Fonction pour Chrome/Edge (qui ont User Data avec Default et Profile *)
+function Get-ChromiumTargets($userDataRoot, $targetPaths) {
+    if (-not (Test-Path $userDataRoot)) { return @() }
+    
+    $targets = @()
+    # Chrome/Edge: chercher Default et Profile *
+    $profiles = Get-ChildItem -Path $userDataRoot -Directory -ErrorAction SilentlyContinue | 
+    Where-Object { $_.Name -eq "Default" -or $_.Name -like "Profile *" }
+    
+    foreach ($profil in $profiles) {
+        foreach ($targetPath in $targetPaths) {
+            $targets += Join-Path $profil.FullName $targetPath
+        }
     }
+    
+    return $targets
 }
-
-# --- Calculs & Affichage ---
 
 function Show-TargetTotals($name, $targets, $color) {
     Write-Host "`n--- $name ---" -ForegroundColor $color
+    
     $total = 0
     foreach ($target in $targets) {
         $size = Get-FolderSize $target
-        $mo = "{0:N2}" -f ($size / 1MB)
+        $mo = [math]::Round($size / 1MB, 4)
         Write-Host "$target : $mo Mo" -ForegroundColor Cyan
         $total += $size
     }
-    $totalMo = "{0:N2}" -f ($total / 1MB)
+    
+    $totalMo = [math]::Round($total / 1MB, 4)
     Write-Host "------------------------------"
     Write-Host "Total $name : $totalMo Mo" -ForegroundColor Yellow
+    
     return $total
 }
+# --- Configuration des cibles ---
+# --- --- Windows --- ---
+$winTargets = @(
+    "$env:TEMP",
+    "$env:WINDIR\Temp",
+    "$env:WINDIR\Logs\CBS",
+    "$env:WINDIR\Prefetch",
+    "$env:WINDIR\WinSxS\Temp",
+    "$env:WINDIR\Downloaded Program Files",
+    "$env:WINDIR\SoftwareDistribution\Download",
+    "$env:PROGRAMDATA\Microsoft\Windows\Caches",
+    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
+    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
+    "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*"
+)
+# --- --- Firefox (Local) --- ---
+$localTargetsFF = @(
+    "cache2\entries"
+    "jumpListCache"
+    "startupCache"
+    "offlineCache"
+    "thumbnails"
+)
+# --- --- Firefox (Roaming) --- ---
+$roamingTargetsFF = @(
+    "storage\default\https+++*"
+    "cookies.sqlite"
+    "places.sqlite"
+)
+# --- --- Google Chrome --- ---
+$localTargetsGC = @(
+    "WebStorage\QuotaManager-journal"
+    "WebStorage\20\IndexedDB\indexeddb.leveldb"
+    "Web Data-journal"
+    "Top Sites"
+    "Network Action Predictor"
+    "Service Worker\ScriptCache"
+    "Service Worker\Database"
+    "Shared Dictionary\db-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network Action Predictor-journal"
+    "Login Data-journal"
+    "Login Data For Account-journal"
+    "History-journal"
+    "GPUCache"
+    "Platform Notifications"
+    "Favicons-journal"
+    "Conversions-journal"
+    "Code Cache"
+    "Cache\Cache_Data"
+    "Affiliation Database-journal"
+)
+# --- --- Edge --- ---
+$localTargetsE = @(
+    "WebStorage\QuotaManager-journal"
+    "WebAssistDatabase-journal"
+    "Web Data-journal"
+    "Top Sites-journal"
+    "Service Worker\ScriptCache"
+    "Service Worker\Database"
+    "Service Worker\CacheStorage"
+    "Nurturing\campaign_history-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network Action Predictor-journal"
+    "Login Data-journal"
+    "Login Data For Account-journal"
+    "IndexedDB\https_ntp.msn.com_0.indexeddb.leveldb"
+    "HubApps Icons-journal"
+    "GPUCache"
+    "Favicons-journal"
+    "EdgePushStorageWithWinRt\*.log"
+    "EdgeHubAppUsage\EdgeHubAppUsageSQLite.db-journal"
+    "EdgeCoupons\coupons_data.db"
+    "Collections\collectionsSQLite-journal"
+    "Code Cache"
+    "Cache\Cache_Data"
+)
+# --- Récupération des chemins ---
+# Firefox utilise la fonction dédiée
+$firefoxLocal = Get-FirefoxTargets "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles" $localTargetsFF
+$firefoxRoaming = Get-FirefoxTargets "$env:APPDATA\Mozilla\Firefox\Profiles" $roamingTargetsFF
 
-$totals = @{}
-$totals.Firefox = Show-TargetTotals "Firefox"  $firefoxTargets  "Green"
-$totals.Chrome = Show-TargetTotals "Chrome"   $chromeTargets   "Green"
-$totals.Edge = Show-TargetTotals "Edge"     $edgeTargets     "Green"
-$totals.Brave = Show-TargetTotals "Brave"    $braveTargets    "Green"
-$totals.Vivaldi = Show-TargetTotals "Vivaldi"  $vivaldiTargets  "Green"
-$totals.Opera = Show-TargetTotals "Opera"    $operaTargets    "Green"
-$totals.Arc = Show-TargetTotals "Arc"      $arcTargets      "Green"
+# Chrome et Edge utilisent la fonction Chromium
+$chromeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Google\Chrome\User Data" $localTargetsGC
+$edgeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Microsoft\Edge\User Data" $localTargetsE
 
-$allTotal = ($totals.Firefox + $totals.Chrome + $totals.Edge + $totals.Brave + $totals.Vivaldi + $totals.Opera + $totals.Arc)
-$allTotalMo = "{0:N2}" -f ($allTotal / 1MB)
+# Fichiers à la racine de User Data pour Chrome/Edge
+$chromeRootTargets = @(
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\first_party_sets.db-journal",
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\CrashpadMetrics-active.pma",
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\BrowserMetrics"
+)
+$edgeRootTargets = @(
+    "$env:LOCALAPPDATA\Microsoft\Edge\User Data\first_party_sets.db-journal"
+)
+
+# --- Calculs ---
+$totals = @{
+    Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
+    FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
+    FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
+    ChromeLocal    = Show-TargetTotals "Chrome Local" $chromeLocal "Green"
+    ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeRootTargets "Green"
+    EdgeLocal      = Show-TargetTotals "Edge Local" $edgeLocal "Green"
+    EdgeRoot       = Show-TargetTotals "Edge Root" $edgeRootTargets "Green"
+}
+$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot
+$allTotalMo = [math]::Round($allTotal / 1MB, 2)
+# --- Affichage ---
 Write-Host "------------------------------"
 Write-Host "Total Tous Navigateurs : $allTotalMo Mo" -ForegroundColor Magenta
 Write-Host "------------------------------"
+
+# --- Résumé final ---
+Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
+Write-Host "║                     RÉSUMÉ DE L'ANALYSE                       ║" -ForegroundColor Magenta
+Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
+Write-Host ""
+# Calcul des totaux par catégorie
+$totalWindows = $totals.Windows
+$totalFirefox = $totals.FirefoxLocal + $totals.FirefoxRoaming
+$totalChrome = $totals.ChromeLocal + $totals.ChromeRoot
+$totalEdge = $totals.EdgeLocal + $totals.EdgeRoot
+$grandTotal = $totalWindows + $totalFirefox + $totalChrome + $totalEdge
+# Affichage formaté
+$winMo = [math]::Round($totalWindows / 1MB, 2)
+$ffMo = [math]::Round($totalFirefox / 1MB, 2)
+$chromeMo = [math]::Round($totalChrome / 1MB, 2)
+$edgeMo = [math]::Round($totalEdge / 1MB, 2)
+$totalMo = [math]::Round($grandTotal / 1MB, 2)
+$totalGo = [math]::Round($grandTotal / 1GB, 2)
+$winGo = [math]::Round($totalWindows / 1GB, 2)
+$ffGo = [math]::Round($totalFirefox / 1GB, 2)
+$chromeGo = [math]::Round($totalChrome / 1GB, 2)
+$edgeGo = [math]::Round($totalEdge / 1GB, 2)
+$duration = (Get-Date) - $startTime
+Write-Host "🪟🪟🪟🪟   Windows (Temp & Cache) : " -NoNewline
+Write-Host ("{0,10} Mo" -f $winMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $winGo) -ForegroundColor DarkGreen
+Write-Host "🦊🦊🦊🦊   Firefox (Total)        : " -NoNewline
+Write-Host ("{0,10} Mo" -f $ffMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $ffGo) -ForegroundColor DarkGreen
+Write-Host "🔵🔴🟡🟢   Chrome                 : " -NoNewline
+Write-Host ("{0,10} Mo" -f $chromeMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $chromeGo) -ForegroundColor DarkGreen
+Write-Host "🌊🌊🌊🌊   Edge                   : " -NoNewline
+Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
+Write-Host "`n  ─────────────────────────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "`n📊  TOTAL GÉNÉRAL               : " -NoNewline
+Write-Host ("{0,10} Mo" -f $totalMo) -ForegroundColor Yellow -NoNewline
+Write-Host (" ({0:N2} Go)" -f $totalGo) -ForegroundColor DarkYellow
+Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
+Write-Host "║                    Analyse terminée ✓                         ║" -ForegroundColor Magenta
+Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
+Write-Host ""
+Read-Host "Fin"

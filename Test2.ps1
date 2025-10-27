@@ -36,6 +36,17 @@ function Get-BrowserTargets($profilesRoot, $targetPaths) {
     if (-not (Test-Path $profilesRoot)) { return @() }
     
     $targets = @()
+    $testPathFF = Get-ChildItem -Path $profilesRoot -Directory | Where-Object { $profilesRoot -like "*Mozilla*" }
+    # Write-Host "$test"
+    if ($testPathFF) {
+        Write-Host "I'M MOTHERFUCKING FF !! " -ForegroundColor Green
+        $profiles = Get-ChildItem -Path $profilesRoot -Directory -ErrorAction SilentlyContinue
+    }
+    else {
+        $profiles = Get-ChildItem -Path $profilesRoot -Directory | Where-Object {
+            $_.Name -eq "Default" -or $_.Name -like "Profile *"
+        }
+    }
     $profiles = Get-ChildItem -Path $profilesRoot -Directory -ErrorAction SilentlyContinue
     
     foreach ($profil in $profiles) {
@@ -107,7 +118,7 @@ $localTargetsGC = @(
 # --- Récupération des chemins ---
 $firefoxLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles" $localTargetsFF
 $firefoxRoaming = Get-BrowserTargets "$env:APPDATA\Mozilla\Firefox\Profiles" $roamingTargetsFF
-$chromeLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Google\Chrome" $localTargetsGC
+$chromeLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Google\Chrome\User Data" $localTargetsGC
 
 # --- Calculs & Affichage ---
 $totals = @{

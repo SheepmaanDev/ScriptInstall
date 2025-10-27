@@ -1,4 +1,4 @@
-# ========================================
+﻿# ========================================
 # VERIFICATION PRIVILEGES ADMINISTRATEUR
 # ========================================
 if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
@@ -14,7 +14,6 @@ function Get-FolderSize($path) {
     if (-not $path) { return 0 }
     
     try {
-        # Gère les wildcards en résolvant tous les chemins correspondants
         $resolvedPaths = @(Resolve-Path $path -ErrorAction SilentlyContinue)
         
         if ($resolvedPaths.Count -eq 0) { return 0 }
@@ -25,14 +24,12 @@ function Get-FolderSize($path) {
             $item = Get-Item $resolvedPath -Force -ErrorAction SilentlyContinue
             
             if ($item.PSIsContainer) {
-                # C'est un dossier : calcule la taille de tout son contenu
                 $size = (Get-ChildItem -Path $resolvedPath -Recurse -Force -File -ErrorAction SilentlyContinue |
                     Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum
                 
                 if ($size) { $totalSize += $size }
             }
             else {
-                # C'est un fichier : ajoute sa taille directement
                 if ($item.Length) { $totalSize += $item.Length }
             }
         }
@@ -43,11 +40,30 @@ function Get-FolderSize($path) {
         return 0
     }
 }
-function Get-BrowserTargets($profilesRoot, $targetPaths) {
+# Fonction pour Firefox (qui a un dossier Profiles)
+function Get-FirefoxTargets($profilesRoot, $targetPaths) {
     if (-not (Test-Path $profilesRoot)) { return @() }
     
     $targets = @()
+    # Firefox: tous les dossiers dans Profiles
     $profiles = Get-ChildItem -Path $profilesRoot -Directory -ErrorAction SilentlyContinue
+    
+    foreach ($profil in $profiles) {
+        foreach ($targetPath in $targetPaths) {
+            $targets += Join-Path $profil.FullName $targetPath
+        }
+    }
+    
+    return $targets
+}
+# Fonction pour Chrome/Edge (qui ont User Data avec Default et Profile *)
+function Get-ChromiumTargets($userDataRoot, $targetPaths) {
+    if (-not (Test-Path $userDataRoot)) { return @() }
+    
+    $targets = @()
+    # Chrome/Edge: chercher Default et Profile *
+    $profiles = Get-ChildItem -Path $userDataRoot -Directory -ErrorAction SilentlyContinue | 
+    Where-Object { $_.Name -eq "Default" -or $_.Name -like "Profile *" }
     
     foreach ($profil in $profiles) {
         foreach ($targetPath in $targetPaths) {
@@ -105,71 +121,109 @@ $roamingTargetsFF = @(
 )
 # --- --- Google Chrome --- ---
 $localTargetsGC = @(
-    "first_party_sets.db-journal"
-    "CrashpadMetrics-active.pma"
-    "BrowserMetrics"
-    "Default\WebStorage\QuotaManager-journal"
-    "Default\WebStorage\20\IndexedDB\indexeddb.leveldb"
-    "Default\Web Data-journal"
-    "Default\Top Sites"
-    "Default\Network Action Predictor"
-    "Default\Service Worker\ScriptCache"
-    "Default\Service Worker\Database"
-    "Default\Shared Dictionary\db-journal"
-    "Default\Network\Cookies-journal"
-    "Default\Network\Reporting and NEL-journal"
-    "Default\Network Action Predictor-journal"
-    "Default\Login Data-journal"
-    "Default\Login Data For Account-journal"
-    "Default\History-journal"
-    "Default\GPUCache"
-    "Default\Favicons-journal"
-    "Default\Conversions-journal"
-    "Default\Code Cache"
-    "Default\Cache\Cache_Data"
-    "Default\Affiliation Database-journal"
+    "WebStorage\QuotaManager-journal"
+    "WebStorage\20\IndexedDB\indexeddb.leveldb"
+    "Web Data-journal"
+    "Top Sites"
+    "Network Action Predictor"
+    "Service Worker\ScriptCache"
+    "Service Worker\Database"
+    "Shared Dictionary\db-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network Action Predictor-journal"
+    "Login Data-journal"
+    "Login Data For Account-journal"
+    "History-journal"
+    "GPUCache"
+    "Platform Notifications"
+    "Favicons-journal"
+    "Conversions-journal"
+    "Code Cache"
+    "Cache\Cache_Data"
+    "Affiliation Database-journal"
 )
 # --- --- Edge --- ---
 $localTargetsE = @(
-    "first_party_sets.db-journal"
-    "Default\WebStorage\QuotaManager-journal"
-    "Default\WebAssistDatabase-journal"
-    "Default\Web Data-journal"
-    "Default\Top Sites-journal"
-    "Default\Service Worker\ScriptCache"
-    "Default\Service Worker\Database"
-    "Default\Service Worker\CacheStorage"
-    "Default\Nurturing\campaign_history-journal"
-    "Default\Network\Cookies-journal"
-    "Default\Network\Reporting and NEL-journal"
-    "Default\Network Action Predictor-journal"
-    "Default\Login Data-journal"
-    "Default\Login Data For Account-journal"
-    "Default\IndexedDB\https_ntp.msn.com_0.indexeddb.leveldb" #???
-    "Default\HubApps Icons-journal"
-    "Default\GPUCache"
-    "Default\Favicons-journal"
-    "Default\EdgePushStorageWithWinRt\*.log"
-    "Default\EdgeHubAppUsage\EdgeHubAppUsageSQLite.db-journal"
-    "Default\EdgeCoupons\coupons_data.db"
-    "Default\Collections\collectionsSQLite-journal"
-    "Default\Code Cache"
-    "Default\Cache\Cache_Data"
+    "WebStorage\QuotaManager-journal"
+    "WebAssistDatabase-journal"
+    "Web Data-journal"
+    "Top Sites-journal"
+    "Service Worker\ScriptCache"
+    "Service Worker\Database"
+    "Service Worker\CacheStorage"
+    "Nurturing\campaign_history-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network Action Predictor-journal"
+    "Login Data-journal"
+    "Login Data For Account-journal"
+    "IndexedDB\https_ntp.msn.com_0.indexeddb.leveldb"
+    "HubApps Icons-journal"
+    "GPUCache"
+    "Favicons-journal"
+    "EdgePushStorageWithWinRt\*.log"
+    "EdgeHubAppUsage\EdgeHubAppUsageSQLite.db-journal"
+    "EdgeCoupons\coupons_data.db"
+    "Collections\collectionsSQLite-journal"
+    "Code Cache"
+    "Cache\Cache_Data"
+)
+# --- --- Brave --- ---
+$localTargetB = @(
+    "Cache\Cache_Data"
+    "GPUCache"
+    "Code Cache"
+    "Account Web Data-journal"
+    "Affiliation Database-journal"
+    "Favicons-journal"
+    "heavy_ad_intervention_opt_out.db-journal"
+    "History-journal"
+    "Login Data For Account-journal"
+    "Login Data-journal"
+    "Network Action Predictor-journal"
+    "ServerCertificate-journal"
+    "Shortcuts-journal"
+    "Top Sites-journal"
+    "Web Data-journal"
+    "ads_service\database.sqlite-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network\Trust Tokens-journal"
+    "Safe Browsing Network\Safe Browsing Cookies-journal"
+    "Shared Dictionary\db-journal"
+    "WebStorage\QuotaManager-journal"
 )
 # --- Récupération des chemins ---
-$firefoxLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles" $localTargetsFF
-$firefoxRoaming = Get-BrowserTargets "$env:APPDATA\Mozilla\Firefox\Profiles" $roamingTargetsFF
-$chromeLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Google\Chrome" $localTargetsGC
-$edgeLocal = Get-BrowserTargets "$env:LOCALAPPDATA\Microsoft\Edge" $localTargetsE
+# Firefox utilise la fonction dédiée
+$firefoxLocal = Get-FirefoxTargets "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles" $localTargetsFF
+$firefoxRoaming = Get-FirefoxTargets "$env:APPDATA\Mozilla\Firefox\Profiles" $roamingTargetsFF
+
+# Chrome et Edge utilisent la fonction Chromium
+$chromeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Google\Chrome\User Data" $localTargetsGC
+$edgeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Microsoft\Edge\User Data" $localTargetsE
+
+# Fichiers à la racine de User Data pour Chrome/Edge
+$chromeRootTargets = @(
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\first_party_sets.db-journal",
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\CrashpadMetrics-active.pma",
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\BrowserMetrics"
+)
+$edgeRootTargets = @(
+    "$env:LOCALAPPDATA\Microsoft\Edge\User Data\first_party_sets.db-journal"
+)
+
 # --- Calculs ---
 $totals = @{
     Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
     FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
     FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
     ChromeLocal    = Show-TargetTotals "Chrome Local" $chromeLocal "Green"
+    ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeRootTargets "Green"
     EdgeLocal      = Show-TargetTotals "Edge Local" $edgeLocal "Green"
+    EdgeRoot       = Show-TargetTotals "Edge Root" $edgeRootTargets "Green"
 }
-$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.EdgeLocal
+$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot
 $allTotalMo = [math]::Round($allTotal / 1MB, 2)
 # --- Affichage ---
 Write-Host "------------------------------"
@@ -184,8 +238,8 @@ Write-Host ""
 # Calcul des totaux par catégorie
 $totalWindows = $totals.Windows
 $totalFirefox = $totals.FirefoxLocal + $totals.FirefoxRoaming
-$totalChrome = $totals.ChromeLocal
-$totalEdge = $totals.EdgeLocal
+$totalChrome = $totals.ChromeLocal + $totals.ChromeRoot
+$totalEdge = $totals.EdgeLocal + $totals.EdgeRoot
 $grandTotal = $totalWindows + $totalFirefox + $totalChrome + $totalEdge
 # Affichage formaté
 $winMo = [math]::Round($totalWindows / 1MB, 2)
@@ -209,9 +263,6 @@ Write-Host "🔵🔴🟡🟢   Chrome                 : " -NoNewline
 Write-Host ("{0,10} Mo" -f $chromeMo) -ForegroundColor Green -NoNewline
 Write-Host (" ({0:N2} Go)" -f $chromeGo) -ForegroundColor DarkGreen
 Write-Host "🌊🌊🌊🌊   Edge                   : " -NoNewline
-Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
-Write-Host "🌊         Edge                   : " -NoNewline
 Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
 Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
 Write-Host "`n  ─────────────────────────────────────────────────────────" -ForegroundColor DarkGray
