@@ -202,6 +202,7 @@ $firefoxRoaming = Get-FirefoxTargets "$env:APPDATA\Mozilla\Firefox\Profiles" $ro
 # Chrome et Edge utilisent la fonction Chromium
 $chromeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Google\Chrome\User Data" $localTargetsGC
 $edgeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Microsoft\Edge\User Data" $localTargetsE
+$braveLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Brave\User Data" $localTargetB
 
 # Fichiers à la racine de User Data pour Chrome/Edge
 $chromeRootTargets = @(
@@ -222,8 +223,10 @@ $totals = @{
     ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeRootTargets "Green"
     EdgeLocal      = Show-TargetTotals "Edge Local" $edgeLocal "Green"
     EdgeRoot       = Show-TargetTotals "Edge Root" $edgeRootTargets "Green"
+    BraveLocal     = Show-TargetTotals "Brave Local" $braveLocal "Green"
+    BraveRoot      = Show-TargetTotals "Brave Root" $braveRootTargets "Green"
 }
-$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot
+$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot + $totals.BraveLocal + $totals.BraveRoot
 $allTotalMo = [math]::Round($allTotal / 1MB, 2)
 # --- Affichage ---
 Write-Host "------------------------------"
@@ -240,18 +243,21 @@ $totalWindows = $totals.Windows
 $totalFirefox = $totals.FirefoxLocal + $totals.FirefoxRoaming
 $totalChrome = $totals.ChromeLocal + $totals.ChromeRoot
 $totalEdge = $totals.EdgeLocal + $totals.EdgeRoot
+$totalBrave = $totals.BraveLocal + $totals.BraveRoot
 $grandTotal = $totalWindows + $totalFirefox + $totalChrome + $totalEdge
 # Affichage formaté
 $winMo = [math]::Round($totalWindows / 1MB, 2)
 $ffMo = [math]::Round($totalFirefox / 1MB, 2)
 $chromeMo = [math]::Round($totalChrome / 1MB, 2)
 $edgeMo = [math]::Round($totalEdge / 1MB, 2)
+$braveMo = [math]::Round($totalBrave / 1MB, 2)
 $totalMo = [math]::Round($grandTotal / 1MB, 2)
 $totalGo = [math]::Round($grandTotal / 1GB, 2)
 $winGo = [math]::Round($totalWindows / 1GB, 2)
 $ffGo = [math]::Round($totalFirefox / 1GB, 2)
 $chromeGo = [math]::Round($totalChrome / 1GB, 2)
 $edgeGo = [math]::Round($totalEdge / 1GB, 2)
+$braveGo = [math]::Round($totalBrave / 1GB, 2)
 $duration = (Get-Date) - $startTime
 Write-Host "🪟🪟🪟🪟   Windows (Temp & Cache) : " -NoNewline
 Write-Host ("{0,10} Mo" -f $winMo) -ForegroundColor Green -NoNewline
@@ -265,6 +271,18 @@ Write-Host (" ({0:N2} Go)" -f $chromeGo) -ForegroundColor DarkGreen
 Write-Host "🌊🌊🌊🌊   Edge                   : " -NoNewline
 Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
 Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
+Write-Host "🦁🦁🦁🦁   Brave                  : " -NoNewline
+Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+Write-Host "⭕⭕⭕⭕   Opera                  : " -NoNewline
+Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+Write-Host "⭕⭕⭕⭕   Opera GX               : " -NoNewline
+Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+Write-Host "🔴🔴🔴🔴   Vivaldi                : " -NoNewline
+Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
 Write-Host "`n  ─────────────────────────────────────────────────────────" -ForegroundColor DarkGray
 Write-Host "`n📊  TOTAL GÉNÉRAL               : " -NoNewline
 Write-Host ("{0,10} Mo" -f $totalMo) -ForegroundColor Yellow -NoNewline
