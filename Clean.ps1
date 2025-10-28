@@ -6,7 +6,198 @@ if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     Start-Process PowerShell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`""
     exit
 }
-$startTime = Get-Date
+# ========================================
+# DEFINITION VARIABLES ET LISTES
+# ========================================
+
+# -------------
+# APPLICATIONS
+#--------------
+
+# -------------
+# NAVIGATEURS
+#--------------
+# --- --- Brave --- ---
+$bravePath = "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data"
+$braveTargetsRoot = @(
+    "$bravePath\component_crx_cache",
+    "$bravePath\extensions_crx_cache",
+    "$bravePath\GraphiteDawnCache",
+    "$bravePath\GrShaderCache",
+    "$bravePath\ShaderCache"
+)
+$braveTargetsL = @(
+    "Cache\Cache_Data"
+    "GPUCache"
+    "Code Cache"
+    "Account Web Data-journal"
+    "Affiliation Database-journal"
+    "Favicons-journal"
+    "heavy_ad_intervention_opt_out.db-journal"
+    "History-journal"
+    "Login Data For Account-journal"
+    "Login Data-journal"
+    "Network Action Predictor-journal"
+    "ServerCertificate-journal"
+    "Shortcuts-journal"
+    "Top Sites-journal"
+    "Web Data-journal"
+    "ads_service\database.sqlite-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network\Trust Tokens-journal"
+    "Safe Browsing Network\Safe Browsing Cookies-journal"
+    "Shared Dictionary\db-journal"
+    "WebStorage\QuotaManager-journal"
+    "Top Sites"
+    "Network Action Predictor"
+)
+# --- --- Edge --- ---
+$edgePath = "$env:LOCALAPPDATA\Microsoft\Edge\User Data"
+$edgeTargetsRoot = @(
+    "$edgePath\first_party_sets.db-journal"
+    "$edgePath\ShaderCache"
+    "$edgePath\GrShaderCache"
+    "$edgePath\GraphiteDawnCache"
+    "$edgePath\extensions_crx_cache"
+    "$edgePath\Snapshots\*\Default\History-journal"
+    "$edgePath\Snapshots\*\Default\Login Data For Account-journal"
+    "$edgePath\Snapshots\*\Default\Login Data-journal"
+    "$edgePath\Snapshots\*\Default\Collections\collectionsSQLite-journal"
+)
+$edgeTargetsL = @(
+    "WebStorage\QuotaManager-journal"
+    "WebAssistDatabase-journal"
+    "Web Data-journal"
+    "Top Sites-journal"
+    "Service Worker\ScriptCache"
+    "Service Worker\Database"
+    "Service Worker\CacheStorage"
+    "Nurturing\campaign_history-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network Action Predictor-journal"
+    "Login Data-journal"
+    "Login Data For Account-journal"
+    "IndexedDB\https_ntp.msn.com_0.indexeddb.leveldb"
+    "HubApps Icons-journal"
+    "GPUCache"
+    "Favicons-journal"
+    "EdgePushStorageWithWinRt\*.log"
+    "EdgeHubAppUsage\EdgeHubAppUsageSQLite.db-journal"
+    "EdgeCoupons\coupons_data.db"
+    "Collections\collectionsSQLite-journal"
+    "Code Cache"
+    "Cache\Cache_Data"
+    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Code Cache"
+    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\GPUCache"
+    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Network\Trust Tokens-journal"
+    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Shared Dictionary\db-journal"
+
+)
+# --- --- Firefox --- ---
+$firefoxPathR = "$env:APPDATA\Mozilla\Firefox\Profiles"
+$firefoxPathL = "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles"
+$firefoxTargetsR = @(
+    "storage\default\https+++*"
+    "cookies.sqlite"
+    "places.sqlite"
+)
+$firefoxTargetsL = @(
+    "cache2\entries"
+    "jumpListCache"
+    "startupCache"
+    "offlineCache"
+    "thumbnails"
+)
+# --- --- Google Chrome --- ---
+$chromePath = "$env:LOCALAPPDATA\Google\Chrome\User Data"
+$chromeTargetsRoot = @(
+    "$chromePath\first_party_sets.db-journal",
+    "$chromePath\CrashpadMetrics-active.pma",
+    "$chromePath\BrowserMetrics"
+)
+$chromeTargetsL = @(
+    "WebStorage\QuotaManager-journal"
+    "WebStorage\20\IndexedDB\indexeddb.leveldb"
+    "Web Data-journal"
+    "Top Sites"
+    "Network Action Predictor"
+    "Service Worker\ScriptCache"
+    "Service Worker\Database"
+    "Shared Dictionary\db-journal"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network Action Predictor-journal"
+    "Login Data-journal"
+    "Login Data For Account-journal"
+    "History-journal"
+    "GPUCache"
+    "Platform Notifications"
+    "Favicons-journal"
+    "Conversions-journal"
+    "Code Cache"
+    "Cache\Cache_Data"
+    "Affiliation Database-journal"
+)
+# --- --- Opera --- ---
+$operaPathR = "$env:APPDATA\Opera Software\Opera Stable"
+$operaPathL = "$env:LOCALAPPDATA\Opera Software\Opera Stable"
+$operaTargetsRoot = @(
+    "$operaPathR\ShaderCache"
+    "$operaPathR\component_crx_cache"
+    "$operaPathR\GraphiteDawnCache"
+    "$operaPathR\GrShaderCach"
+)
+$operaTargetsR = @(
+    "Affiliation Database-journal"
+    "Favicons-journal"
+    "History-journal"
+    "Login Data-journal"
+    "Network Action Predictor"
+    "Network Action Predictor-journal"
+    "ServerCertificate-journal"
+    "Shortcuts-journal"
+    "Web Data-journal"
+    "Jump List Icons"
+    "Jump List IconsOld"
+    "Network\Cookies-journal"
+    "Network\Reporting and NEL-journal"
+    "Network\Trust Tokens-journal"
+    "Safe Browsing Network\Safe Browsing Cookies-journal"
+    "Shared Dictionary\db-journal"
+    "WebStorage\5"
+    "WebStorage\7"
+    "WebStorage\QuotaManager-journal"
+    "GPUCache"
+    "Code Cache"
+    "IndexedDB\https*"
+)
+$operaTargetsL = @(
+    "cache\Cache_Data"
+)
+# --- --- Opera GX --- ---
+# --- --- Vivaldi --- ---
+
+# -------------
+# WINDOWS/SYST
+#--------------
+$winTargets = @(
+    "$env:TEMP",
+    "$env:WINDIR\Temp",
+    "$env:WINDIR\Logs\CBS",
+    "$env:WINDIR\Prefetch",
+    "$env:WINDIR\WinSxS\Temp",
+    "$env:WINDIR\Downloaded Program Files",
+    "$env:WINDIR\SoftwareDistribution\Download",
+    "$env:PROGRAMDATA\Microsoft\Windows\Caches",
+    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
+    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
+    "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*"
+)
+# ========================================
+# CREATION DES FONCTIONS
+# ========================================
 function Get-Timestamp {
     return Get-Date -Format "[dd/MM/yy HH:mm:ss]"
 }
@@ -90,129 +281,23 @@ function Show-TargetTotals($name, $targets, $color) {
     
     return $total
 }
-# --- Configuration des cibles ---
-# --- --- Windows --- ---
-$winTargets = @(
-    "$env:TEMP",
-    "$env:WINDIR\Temp",
-    "$env:WINDIR\Logs\CBS",
-    "$env:WINDIR\Prefetch",
-    "$env:WINDIR\WinSxS\Temp",
-    "$env:WINDIR\Downloaded Program Files",
-    "$env:WINDIR\SoftwareDistribution\Download",
-    "$env:PROGRAMDATA\Microsoft\Windows\Caches",
-    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
-    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
-    "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*"
-)
-# --- --- Firefox (Local) --- ---
-$localTargetsFF = @(
-    "cache2\entries"
-    "jumpListCache"
-    "startupCache"
-    "offlineCache"
-    "thumbnails"
-)
-# --- --- Firefox (Roaming) --- ---
-$roamingTargetsFF = @(
-    "storage\default\https+++*"
-    "cookies.sqlite"
-    "places.sqlite"
-)
-# --- --- Google Chrome --- ---
-$localTargetsGC = @(
-    "WebStorage\QuotaManager-journal"
-    "WebStorage\20\IndexedDB\indexeddb.leveldb"
-    "Web Data-journal"
-    "Top Sites"
-    "Network Action Predictor"
-    "Service Worker\ScriptCache"
-    "Service Worker\Database"
-    "Shared Dictionary\db-journal"
-    "Network\Cookies-journal"
-    "Network\Reporting and NEL-journal"
-    "Network Action Predictor-journal"
-    "Login Data-journal"
-    "Login Data For Account-journal"
-    "History-journal"
-    "GPUCache"
-    "Platform Notifications"
-    "Favicons-journal"
-    "Conversions-journal"
-    "Code Cache"
-    "Cache\Cache_Data"
-    "Affiliation Database-journal"
-)
-# --- --- Edge --- ---
-$localTargetsE = @(
-    "WebStorage\QuotaManager-journal"
-    "WebAssistDatabase-journal"
-    "Web Data-journal"
-    "Top Sites-journal"
-    "Service Worker\ScriptCache"
-    "Service Worker\Database"
-    "Service Worker\CacheStorage"
-    "Nurturing\campaign_history-journal"
-    "Network\Cookies-journal"
-    "Network\Reporting and NEL-journal"
-    "Network Action Predictor-journal"
-    "Login Data-journal"
-    "Login Data For Account-journal"
-    "IndexedDB\https_ntp.msn.com_0.indexeddb.leveldb"
-    "HubApps Icons-journal"
-    "GPUCache"
-    "Favicons-journal"
-    "EdgePushStorageWithWinRt\*.log"
-    "EdgeHubAppUsage\EdgeHubAppUsageSQLite.db-journal"
-    "EdgeCoupons\coupons_data.db"
-    "Collections\collectionsSQLite-journal"
-    "Code Cache"
-    "Cache\Cache_Data"
-)
-# --- --- Brave --- ---
-$localTargetB = @(
-    "Cache\Cache_Data"
-    "GPUCache"
-    "Code Cache"
-    "Account Web Data-journal"
-    "Affiliation Database-journal"
-    "Favicons-journal"
-    "heavy_ad_intervention_opt_out.db-journal"
-    "History-journal"
-    "Login Data For Account-journal"
-    "Login Data-journal"
-    "Network Action Predictor-journal"
-    "ServerCertificate-journal"
-    "Shortcuts-journal"
-    "Top Sites-journal"
-    "Web Data-journal"
-    "ads_service\database.sqlite-journal"
-    "Network\Cookies-journal"
-    "Network\Reporting and NEL-journal"
-    "Network\Trust Tokens-journal"
-    "Safe Browsing Network\Safe Browsing Cookies-journal"
-    "Shared Dictionary\db-journal"
-    "WebStorage\QuotaManager-journal"
-)
+
+# ========================================
+# EXECUTION DES FONCTIONS
+# ========================================
+$startTime = Get-Date
+
 # --- Récupération des chemins ---
 # Firefox utilise la fonction dédiée
-$firefoxLocal = Get-FirefoxTargets "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles" $localTargetsFF
-$firefoxRoaming = Get-FirefoxTargets "$env:APPDATA\Mozilla\Firefox\Profiles" $roamingTargetsFF
+$firefoxLocal = Get-FirefoxTargets $firefoxPathL $firefoxTargetsL
+$firefoxRoaming = Get-FirefoxTargets $firefoxPathR $firefoxTargetsR
+$operaLocal = Get-ChromiumTargets $operaPathL $operaTargetsL
+$operaRoaming = Get-ChromiumTargets $operaPathR $operaTargetsR
 
 # Chrome et Edge utilisent la fonction Chromium
-$chromeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Google\Chrome\User Data" $localTargetsGC
-$edgeLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Microsoft\Edge\User Data" $localTargetsE
-$braveLocal = Get-ChromiumTargets "$env:LOCALAPPDATA\Brave\User Data" $localTargetB
-
-# Fichiers à la racine de User Data pour Chrome/Edge
-$chromeRootTargets = @(
-    "$env:LOCALAPPDATA\Google\Chrome\User Data\first_party_sets.db-journal",
-    "$env:LOCALAPPDATA\Google\Chrome\User Data\CrashpadMetrics-active.pma",
-    "$env:LOCALAPPDATA\Google\Chrome\User Data\BrowserMetrics"
-)
-$edgeRootTargets = @(
-    "$env:LOCALAPPDATA\Microsoft\Edge\User Data\first_party_sets.db-journal"
-)
+$chromeLocal = Get-ChromiumTargets $chromePath $chromeTargetsL
+$edgeLocal = Get-ChromiumTargets $edgePath $edgeTargetsL
+$braveLocal = Get-ChromiumTargets $bravePath $braveTargetsL
 
 # --- Calculs ---
 $totals = @{
@@ -220,13 +305,16 @@ $totals = @{
     FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
     FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
     ChromeLocal    = Show-TargetTotals "Chrome Local" $chromeLocal "Green"
-    ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeRootTargets "Green"
+    ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeTargetsRoot "Green"
     EdgeLocal      = Show-TargetTotals "Edge Local" $edgeLocal "Green"
-    EdgeRoot       = Show-TargetTotals "Edge Root" $edgeRootTargets "Green"
+    EdgeRoot       = Show-TargetTotals "Edge Root" $edgeTargetsRoot "Green"
     BraveLocal     = Show-TargetTotals "Brave Local" $braveLocal "Green"
-    BraveRoot      = Show-TargetTotals "Brave Root" $braveRootTargets "Green"
+    BraveRoot      = Show-TargetTotals "Brave Root" $braveTargetsRoot "Green"
+    OperaLocal     = Show-TargetTotals "Opera Local" $operaLocal "Green"
+    OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
+    OperaRoot      = Show-TargetTotals "Opera Root" $operaTargetsRoot "Green"
 }
-$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot + $totals.BraveLocal + $totals.BraveRoot
+$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot + $totals.BraveLocal + $totals.BraveRoot + $totals.OperaLocal + $totals.OperaRoaming + $totals.OperaRoot
 $allTotalMo = [math]::Round($allTotal / 1MB, 2)
 # --- Affichage ---
 Write-Host "------------------------------"
@@ -244,13 +332,15 @@ $totalFirefox = $totals.FirefoxLocal + $totals.FirefoxRoaming
 $totalChrome = $totals.ChromeLocal + $totals.ChromeRoot
 $totalEdge = $totals.EdgeLocal + $totals.EdgeRoot
 $totalBrave = $totals.BraveLocal + $totals.BraveRoot
-$grandTotal = $totalWindows + $totalFirefox + $totalChrome + $totalEdge
+$totalOpera = $totals.OperaLocal + $totals.OperaRoaming + $totals.OperaRoot
+$grandTotal = $totalWindows + $totalFirefox + $totalChrome + $totalEdge + $totalBrave + $totalOpera
 # Affichage formaté
 $winMo = [math]::Round($totalWindows / 1MB, 2)
 $ffMo = [math]::Round($totalFirefox / 1MB, 2)
 $chromeMo = [math]::Round($totalChrome / 1MB, 2)
 $edgeMo = [math]::Round($totalEdge / 1MB, 2)
 $braveMo = [math]::Round($totalBrave / 1MB, 2)
+$operaMo = [math]::Round($totalOpera / 1MB, 2)
 $totalMo = [math]::Round($grandTotal / 1MB, 2)
 $totalGo = [math]::Round($grandTotal / 1GB, 2)
 $winGo = [math]::Round($totalWindows / 1GB, 2)
@@ -258,6 +348,7 @@ $ffGo = [math]::Round($totalFirefox / 1GB, 2)
 $chromeGo = [math]::Round($totalChrome / 1GB, 2)
 $edgeGo = [math]::Round($totalEdge / 1GB, 2)
 $braveGo = [math]::Round($totalBrave / 1GB, 2)
+$operaGo = [math]::Round($totalOpera / 1GB, 2)
 $duration = (Get-Date) - $startTime
 Write-Host "🪟🪟🪟🪟   Windows (Temp & Cache) : " -NoNewline
 Write-Host ("{0,10} Mo" -f $winMo) -ForegroundColor Green -NoNewline
@@ -275,8 +366,8 @@ Write-Host "🦁🦁🦁🦁   Brave                  : " -NoNewline
 Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
 Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
 Write-Host "⭕⭕⭕⭕   Opera                  : " -NoNewline
-Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+Write-Host ("{0,10} Mo" -f $operaMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $operaGo) -ForegroundColor DarkGreen
 Write-Host "⭕⭕⭕⭕   Opera GX               : " -NoNewline
 Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
 Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
@@ -291,4 +382,4 @@ Write-Host "`n╔═════════════════════
 Write-Host "║                    Analyse terminée ✓                         ║" -ForegroundColor Magenta
 Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
 Write-Host ""
-Read-Host "Fin"
+# Read-Host "Fin"
