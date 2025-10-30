@@ -58,11 +58,12 @@ $edgeTargetsRoot = @(
     "$edgePath\first_party_sets.db-journal"
     "$edgePath\ShaderCache"
     "$edgePath\GrShaderCache"
+    "$edgePath\BrowserMetrics"
     "$edgePath\GraphiteDawnCache"
     "$edgePath\extensions_crx_cache"
     "$edgePath\Snapshots\*\Default\History-journal"
-    "$edgePath\Snapshots\*\Default\Login Data For Account-journal"
     "$edgePath\Snapshots\*\Default\Login Data-journal"
+    "$edgePath\Snapshots\*\Default\Login Data For Account-journal"
     "$edgePath\Snapshots\*\Default\Collections\collectionsSQLite-journal"
 )
 $edgeTargetsL = @(
@@ -93,7 +94,22 @@ $edgeTargetsL = @(
     "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\GPUCache"
     "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Network\Trust Tokens-journal"
     "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Shared Dictionary\db-journal"
-
+    "IndexedDB\https*"
+    "ExtensionActivityEdge-journal"
+    "History-journal"
+    "Collections\collectionsSQLite-journal"
+    "Shared Dictionary\db-journal"
+    "BrowsingTopicsSiteData-journal"
+    "ExensionActivityEdge-journal"
+    "heavy_ad_intervention_opt_out.db-journal"
+    "PrivateAggregation-journal"
+    "ServerCertificate-journal"
+    "Shortcuts-journal"
+    "Vpn Tokens-journal"
+    "Web Data-journal"
+    "EdgeEDrop\EdgeEDropSQLite.db-journal"
+    "Network\Trust Tokens-journal"
+    "Safe Browsing Network\Safe Browsing Cookies-journal"
 )
 # --- --- Firefox --- ---
 $firefoxPathR = "$env:APPDATA\Mozilla\Firefox\Profiles"
@@ -270,8 +286,8 @@ function Show-TargetTotals($name, $targets, $color) {
     $total = 0
     foreach ($target in $targets) {
         $size = Get-FolderSize $target
-        $mo = [math]::Round($size / 1MB, 4)
-        Write-Host "$target : $mo Mo" -ForegroundColor Cyan
+        $mo = [math]::Round($size / 1KB, 4)
+        Write-Host "$target : $mo Ko" -ForegroundColor Cyan
         $total += $size
     }
     
@@ -301,18 +317,18 @@ $braveLocal = Get-ChromiumTargets $bravePath $braveTargetsL
 
 # --- Calculs ---
 $totals = @{
-    Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
-    FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
-    FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
-    ChromeLocal    = Show-TargetTotals "Chrome Local" $chromeLocal "Green"
-    ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeTargetsRoot "Green"
-    EdgeLocal      = Show-TargetTotals "Edge Local" $edgeLocal "Green"
-    EdgeRoot       = Show-TargetTotals "Edge Root" $edgeTargetsRoot "Green"
-    BraveLocal     = Show-TargetTotals "Brave Local" $braveLocal "Green"
-    BraveRoot      = Show-TargetTotals "Brave Root" $braveTargetsRoot "Green"
-    OperaLocal     = Show-TargetTotals "Opera Local" $operaLocal "Green"
-    OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
-    OperaRoot      = Show-TargetTotals "Opera Root" $operaTargetsRoot "Green"
+    # Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
+    # FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
+    # FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
+    # ChromeLocal    = Show-TargetTotals "Chrome Local" $chromeLocal "Green"
+    # ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeTargetsRoot "Green"
+    EdgeLocal = Show-TargetTotals "Edge Local" $edgeLocal "Green"
+    EdgeRoot  = Show-TargetTotals "Edge Root" $edgeTargetsRoot "Green"
+    # BraveLocal     = Show-TargetTotals "Brave Local" $braveLocal "Green"
+    # BraveRoot      = Show-TargetTotals "Brave Root" $braveTargetsRoot "Green"
+    # OperaLocal     = Show-TargetTotals "Opera Local" $operaLocal "Green"
+    # OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
+    # OperaRoot      = Show-TargetTotals "Opera Root" $operaTargetsRoot "Green"
 }
 $allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot + $totals.BraveLocal + $totals.BraveRoot + $totals.OperaLocal + $totals.OperaRoaming + $totals.OperaRoot
 $allTotalMo = [math]::Round($allTotal / 1MB, 2)

@@ -1,200 +1,100 @@
-# ========================================
-# VERIFICATION PRIVILEGES ADMINISTRATEUR
-# ========================================
-if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "Ce script doit être exécuté en tant qu'administrateur. Redémarrage..." -ForegroundColor Yellow
-    Start-Process PowerShell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`""
-    exit
-}
-# ========================================
-# DEFINITION VARIABLES ET LISTES
-# ========================================
-
-# -------------
-# APPLICATIONS
-#--------------
-
-# -------------
-# NAVIGATEURS
-#--------------
-# --- --- Brave --- ---
-$bravePath = "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data"
-$braveTargetsRoot = @(
-    "$bravePath\component_crx_cache",
-    "$bravePath\extensions_crx_cache",
-    "$bravePath\GraphiteDawnCache",
-    "$bravePath\GrShaderCache",
-    "$bravePath\ShaderCache"
-)
-$braveTargetsL = @(
-    "Cache\Cache_Data"
-    "GPUCache"
-    "Code Cache"
-    "Account Web Data-journal"
-    "Affiliation Database-journal"
-    "Favicons-journal"
-    "heavy_ad_intervention_opt_out.db-journal"
-    "History-journal"
-    "Login Data For Account-journal"
-    "Login Data-journal"
-    "Network Action Predictor-journal"
-    "ServerCertificate-journal"
-    "Shortcuts-journal"
-    "Top Sites-journal"
-    "Web Data-journal"
-    "ads_service\database.sqlite-journal"
-    "Network\Cookies-journal"
-    "Network\Reporting and NEL-journal"
-    "Network\Trust Tokens-journal"
-    "Safe Browsing Network\Safe Browsing Cookies-journal"
-    "Shared Dictionary\db-journal"
-    "WebStorage\QuotaManager-journal"
-    "Top Sites"
-    "Network Action Predictor"
-)
 # --- --- Edge --- ---
-$edgePath = "$env:LOCALAPPDATA\Microsoft\Edge\User Data"
-$edgeTargetsRoot = @(
-    "$edgePath\first_party_sets.db-journal"
-    "$edgePath\ShaderCache"
-    "$edgePath\GrShaderCache"
-    "$edgePath\GraphiteDawnCache"
-    "$edgePath\extensions_crx_cache"
-    "$edgePath\Snapshots\*\Default\History-journal"
-    "$edgePath\Snapshots\*\Default\Login Data For Account-journal"
-    "$edgePath\Snapshots\*\Default\Login Data-journal"
-    "$edgePath\Snapshots\*\Default\Collections\collectionsSQLite-journal"
-)
-$edgeTargetsL = @(
-    "WebStorage\QuotaManager-journal"
-    "WebAssistDatabase-journal"
-    "Web Data-journal"
-    "Top Sites-journal"
-    "Service Worker\ScriptCache"
-    "Service Worker\Database"
-    "Service Worker\CacheStorage"
-    "Nurturing\campaign_history-journal"
-    "Network\Cookies-journal"
-    "Network\Reporting and NEL-journal"
-    "Network Action Predictor-journal"
-    "Login Data-journal"
-    "Login Data For Account-journal"
-    "IndexedDB\https_ntp.msn.com_0.indexeddb.leveldb"
-    "HubApps Icons-journal"
-    "GPUCache"
-    "Favicons-journal"
-    "EdgePushStorageWithWinRt\*.log"
-    "EdgeHubAppUsage\EdgeHubAppUsageSQLite.db-journal"
-    "EdgeCoupons\coupons_data.db"
-    "Collections\collectionsSQLite-journal"
-    "Code Cache"
+$edgeProfilPath = "$env:LOCALAPPDATA\Microsoft\Edge\User Data"
+$edgeTargets = @(
+    # "Cache"
     "Cache\Cache_Data"
-    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Code Cache"
-    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\GPUCache"
-    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Network\Trust Tokens-journal"
-    "Storage\ext\ihmafllikibpmigkcoadcmckbfhibefp\def\Shared Dictionary\db-journal"
-
+    "Code Cache"
+    "GPUCache"
+    "DawnCache"
+    "Media Cache"
+    # "Service Worker"
+    "Service Worker\CacheStorage"
+    "Service Worker\ScriptCache"
+    "Site Characteristics Database"
+    "optimization_guide_hint_cache_store"
+    "optimization_guide_model_and_features_store"
+    # "Local Storage" ???
+    "Session Storage"
+    # "IndexedDB" ???
+    "databases"
+    "blob_storage"
+    # "File System" ??? /!\
+    "Download Service"
+    # "Storage\ext" ???
+    "WebRTC Logs"
+    # "Sessions" ???
+    "Network"
+    "AutofillStrikeDatabase"
 )
-# --- --- Firefox --- ---
-$firefoxPathR = "$env:APPDATA\Mozilla\Firefox\Profiles"
-$firefoxPathL = "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles"
-$firefoxTargetsR = @(
-    "storage\default\https+++*"
-    "cookies.sqlite"
-    "places.sqlite"
-)
-$firefoxTargetsL = @(
-    "cache2\entries"
-    "jumpListCache"
-    "startupCache"
-    "offlineCache"
-    "thumbnails"
+$edgeTargetsRoot = @(
+    "$edgeProfilPath\ShaderCache"
+    "$edgeProfilPath\GrShaderCache"
 )
 # --- --- Google Chrome --- ---
-$chromePath = "$env:LOCALAPPDATA\Google\Chrome\User Data"
-$chromeTargetsRoot = @(
-    "$chromePath\first_party_sets.db-journal",
-    "$chromePath\CrashpadMetrics-active.pma",
-    "$chromePath\BrowserMetrics"
-)
-$chromeTargetsL = @(
-    "WebStorage\QuotaManager-journal"
-    "WebStorage\20\IndexedDB\indexeddb.leveldb"
-    "Web Data-journal"
-    "Top Sites"
-    "Network Action Predictor"
-    "Service Worker\ScriptCache"
-    "Service Worker\Database"
-    "Shared Dictionary\db-journal"
-    "Network\Cookies-journal"
-    "Network\Reporting and NEL-journal"
-    "Network Action Predictor-journal"
-    "Login Data-journal"
-    "Login Data For Account-journal"
-    "History-journal"
-    "GPUCache"
-    "Platform Notifications"
-    "Favicons-journal"
-    "Conversions-journal"
-    "Code Cache"
+$chromeProfilPath = "$env:LOCALAPPDATA\Google\Chrome\User Data"
+$chromeTargets = @(
+    # "Cache"
     "Cache\Cache_Data"
-    "Affiliation Database-journal"
-)
-# --- --- Opera --- ---
-$operaPathR = "$env:APPDATA\Opera Software\Opera Stable"
-$operaPathL = "$env:LOCALAPPDATA\Opera Software\Opera Stable"
-$operaTargetsRoot = @(
-    "$operaPathR\ShaderCache"
-    "$operaPathR\component_crx_cache"
-    "$operaPathR\GraphiteDawnCache"
-    "$operaPathR\GrShaderCach"
-)
-$operaTargetsR = @(
-    "Affiliation Database-journal"
-    "Favicons-journal"
-    "History-journal"
-    "Login Data-journal"
-    "Network Action Predictor"
-    "Network Action Predictor-journal"
-    "ServerCertificate-journal"
-    "Shortcuts-journal"
-    "Web Data-journal"
-    "Jump List Icons"
-    "Jump List IconsOld"
-    "Network\Cookies-journal"
-    "Network\Reporting and NEL-journal"
-    "Network\Trust Tokens-journal"
-    "Safe Browsing Network\Safe Browsing Cookies-journal"
-    "Shared Dictionary\db-journal"
-    "WebStorage\5"
-    "WebStorage\7"
-    "WebStorage\QuotaManager-journal"
-    "GPUCache"
     "Code Cache"
-    "IndexedDB\https*"
+    "GPUCache"
+    "DawnCache"
+    "Media Cache"
+    # "Service Worker"
+    "Service Worker\CacheStorage"
+    "Service Worker\ScriptCache"
+    "Site Characteristics Database"
+    "optimization_guide_hint_cache_store"
+    "optimization_guide_model_and_features_store"
+    # "Local Storage" ???
+    "Session Storage"
+    # "IndexedDB" ???
+    "databases"
+    "blob_storage"
+    # "File System" ??? /!\
+    "Download Service"
+    # "Storage\ext" ???
+    "WebRTC Logs"
+    # "Sessions" ???
+    "Network"
+    "AutofillStrikeDatabase"
 )
-$operaTargetsL = @(
-    "cache\Cache_Data"
+$chromeTargetsRoot = @(
+    "$chromeProfilPath\ShaderCache"
+    "$chromeProfilPath\GrShaderCache"
 )
-# --- --- Opera GX --- ---
-# --- --- Vivaldi --- ---
+# --- --- Brave --- ---
+$braveProfilPath = "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data"
+$braveTargets = @(
+    # "Cache"
+    "Cache\Cache_Data"
+    "Code Cache"
+    "GPUCache"
+    "DawnCache"
+    "Media Cache"
+    # "Service Worker"
+    "Service Worker\CacheStorage"
+    "Service Worker\ScriptCache"
+    "Site Characteristics Database"
+    "optimization_guide_hint_cache_store"
+    "optimization_guide_model_and_features_store"
+    # "Local Storage" ???
+    "Session Storage"
+    # "IndexedDB" ???
+    "databases"
+    "blob_storage"
+    # "File System" ??? /!\
+    "Download Service"
+    # "Storage\ext" ???
+    "WebRTC Logs"
+    # "Sessions" ???
+    "Network"
+    "AutofillStrikeDatabase"
+)
+$braveTargetsRoot = @(
+    "$braveProfilPath\ShaderCache"
+    "$braveProfilPath\GrShaderCache"
+)
 
-# -------------
-# WINDOWS/SYST
-#--------------
-$winTargets = @(
-    "$env:TEMP",
-    "$env:WINDIR\Temp",
-    "$env:WINDIR\Logs\CBS",
-    "$env:WINDIR\Prefetch",
-    "$env:WINDIR\WinSxS\Temp",
-    "$env:WINDIR\Downloaded Program Files",
-    "$env:WINDIR\SoftwareDistribution\Download",
-    "$env:PROGRAMDATA\Microsoft\Windows\Caches",
-    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
-    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
-    "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*"
-)
 # ========================================
 # CREATION DES FONCTIONS
 # ========================================
@@ -270,8 +170,8 @@ function Show-TargetTotals($name, $targets, $color) {
     $total = 0
     foreach ($target in $targets) {
         $size = Get-FolderSize $target
-        $mo = [math]::Round($size / 1MB, 4)
-        Write-Host "$target : $mo Mo" -ForegroundColor Cyan
+        $mo = [math]::Round($size / 1KB, 4)
+        Write-Host "$target : $mo Ko" -ForegroundColor Cyan
         $total += $size
     }
     
@@ -282,37 +182,23 @@ function Show-TargetTotals($name, $targets, $color) {
     return $total
 }
 
-# ========================================
-# EXECUTION DES FONCTIONS
-# ========================================
-$startTime = Get-Date
-
-# --- Récupération des chemins ---
-# Firefox utilise la fonction dédiée
-$firefoxLocal = Get-FirefoxTargets $firefoxPathL $firefoxTargetsL
-$firefoxRoaming = Get-FirefoxTargets $firefoxPathR $firefoxTargetsR
-$operaLocal = Get-ChromiumTargets $operaPathL $operaTargetsL
-$operaRoaming = Get-ChromiumTargets $operaPathR $operaTargetsR
-
-# Chrome et Edge utilisent la fonction Chromium
-$chromeLocal = Get-ChromiumTargets $chromePath $chromeTargetsL
-$edgeLocal = Get-ChromiumTargets $edgePath $edgeTargetsL
-$braveLocal = Get-ChromiumTargets $bravePath $braveTargetsL
-
+$edgeLocal = Get-ChromiumTargets $edgeProfilPath $edgeTargets
+$chromeLocal = Get-ChromiumTargets $chromeProfilPath $chromeTargets
+$braveLocal = Get-ChromiumTargets $braveProfilPath $braveTargets
 # --- Calculs ---
 $totals = @{
-    Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
-    FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
-    FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
-    ChromeLocal    = Show-TargetTotals "Chrome Local" $chromeLocal "Green"
-    ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeTargetsRoot "Green"
-    EdgeLocal      = Show-TargetTotals "Edge Local" $edgeLocal "Green"
-    EdgeRoot       = Show-TargetTotals "Edge Root" $edgeTargetsRoot "Green"
-    BraveLocal     = Show-TargetTotals "Brave Local" $braveLocal "Green"
-    BraveRoot      = Show-TargetTotals "Brave Root" $braveTargetsRoot "Green"
-    OperaLocal     = Show-TargetTotals "Opera Local" $operaLocal "Green"
-    OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
-    OperaRoot      = Show-TargetTotals "Opera Root" $operaTargetsRoot "Green"
+    # Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
+    # FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
+    # FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
+    EdgeRoot    = Show-TargetTotals "Edge Root" $edgeTargetsRoot "Green"
+    EdgeLocal   = Show-TargetTotals "Edge Profil" $edgeLocal "Green"
+    ChromeRoot  = Show-TargetTotals "Chrome Root" $chromeTargetsRoot "Green"
+    ChromeLocal = Show-TargetTotals "Chrome Profil" $chromeLocal "Green"
+    BraveRoot   = Show-TargetTotals "Brave Root" $braveTargetsRoot "Green"
+    BraveLocal  = Show-TargetTotals "Brave Local" $braveLocal "Green"
+    # OperaLocal     = Show-TargetTotals "Opera Local" $operaLocal "Green"
+    # OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
+    # OperaRoot      = Show-TargetTotals "Opera Root" $operaTargetsRoot "Green"
 }
 $allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot + $totals.BraveLocal + $totals.BraveRoot + $totals.OperaLocal + $totals.OperaRoaming + $totals.OperaRoot
 $allTotalMo = [math]::Round($allTotal / 1MB, 2)
@@ -322,10 +208,10 @@ Write-Host "Total Tous Navigateurs : $allTotalMo Mo" -ForegroundColor Magenta
 Write-Host "------------------------------"
 
 # --- Résumé final ---
-Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
-Write-Host "║                     RÉSUMÉ DE L'ANALYSE                       ║" -ForegroundColor Magenta
-Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
-Write-Host ""
+# Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
+# Write-Host "║                     RÉSUMÉ DE L'ANALYSE                       ║" -ForegroundColor Magenta
+# Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
+# Write-Host ""
 # Calcul des totaux par catégorie
 $totalWindows = $totals.Windows
 $totalFirefox = $totals.FirefoxLocal + $totals.FirefoxRoaming
@@ -350,36 +236,131 @@ $edgeGo = [math]::Round($totalEdge / 1GB, 2)
 $braveGo = [math]::Round($totalBrave / 1GB, 2)
 $operaGo = [math]::Round($totalOpera / 1GB, 2)
 $duration = (Get-Date) - $startTime
-Write-Host "🪟🪟🪟🪟   Windows (Temp & Cache) : " -NoNewline
-Write-Host ("{0,10} Mo" -f $winMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $winGo) -ForegroundColor DarkGreen
-Write-Host "🦊🦊🦊🦊   Firefox (Total)        : " -NoNewline
-Write-Host ("{0,10} Mo" -f $ffMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $ffGo) -ForegroundColor DarkGreen
-Write-Host "🔵🔴🟡🟢   Chrome                 : " -NoNewline
-Write-Host ("{0,10} Mo" -f $chromeMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $chromeGo) -ForegroundColor DarkGreen
-Write-Host "🌊🌊🌊🌊   Edge                   : " -NoNewline
-Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
-Write-Host "🦁🦁🦁🦁   Brave                  : " -NoNewline
-Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
-Write-Host "⭕⭕⭕⭕   Opera                  : " -NoNewline
-Write-Host ("{0,10} Mo" -f $operaMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $operaGo) -ForegroundColor DarkGreen
-Write-Host "⭕⭕⭕⭕   Opera GX               : " -NoNewline
-Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
-Write-Host "🔴🔴🔴🔴   Vivaldi                : " -NoNewline
-Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
-Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
-Write-Host "`n  ─────────────────────────────────────────────────────────" -ForegroundColor DarkGray
-Write-Host "`n📊  TOTAL GÉNÉRAL               : " -NoNewline
-Write-Host ("{0,10} Mo" -f $totalMo) -ForegroundColor Yellow -NoNewline
-Write-Host (" ({0:N2} Go)" -f $totalGo) -ForegroundColor DarkYellow
-Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
-Write-Host "║                    Analyse terminée ✓                         ║" -ForegroundColor Magenta
-Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
-Write-Host ""
-# Read-Host "Fin"
+Write-Host "$duration"
+# Write-Host "🪟🪟🪟🪟   Windows (Temp & Cache) : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $winMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $winGo) -ForegroundColor DarkGreen
+# Write-Host "🦊🦊🦊🦊   Firefox (Total)        : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $ffMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $ffGo) -ForegroundColor DarkGreen
+# Write-Host "🔵🔴🟡🟢   Chrome                 : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $chromeMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $chromeGo) -ForegroundColor DarkGreen
+# Write-Host "🌊🌊🌊🌊   Edge                   : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
+# Write-Host "🦁🦁🦁🦁   Brave                  : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+# Write-Host "⭕⭕⭕⭕   Opera                  : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $operaMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $operaGo) -ForegroundColor DarkGreen
+# Write-Host "⭕⭕⭕⭕   Opera GX               : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+# Write-Host "🔴🔴🔴🔴   Vivaldi                : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+# Write-Host "`n  ─────────────────────────────────────────────────────────" -ForegroundColor DarkGray
+# Write-Host "`n📊  TOTAL GÉNÉRAL               : " -NoNewline
+# Write-Host ("{0,10} Mo" -f $totalMo) -ForegroundColor Yellow -NoNewline
+# Write-Host (" ({0:N2} Go)" -f $totalGo) -ForegroundColor DarkYellow
+# Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
+# Write-Host "║                    Analyse terminée ✓                         ║" -ForegroundColor Magenta
+# Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
+# Write-Host ""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Cache\                        (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Cache\Cache_Data\             (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Code Cache\                   (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\GPUCache\                     (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Service Worker\               (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Service Worker\CacheStorage\  (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Blob_storage\                 (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Network\                      (SUPPRIMABLE) -------------
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\GrShaderCache\                (SUPPRIMABLE) ------------
+
+# # Stockage et données web (SUPPRIMABLE pour nettoyage profond, mais perte de sessions/sites connectés/autorisations) :
+# $edgeTargetsData = @(
+#     "IndexedDB"
+#     "Local Storage"
+#     "Session Storage"
+#     "Storage"
+#     "Shared Dictionary"
+#     "QuotaManager"
+# )
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\IndexedDB\             (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Local Storage\         (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Session Storage\       (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Storage\               (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Shared Dictionary\     (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\QuotaManager           (SUPPRIMABLE) -----------
+# Attention : perte des stocks web apps, localStorage, bases IndexedDB, etc., possible déconnexion de sites.
+
+# Fichiers de données utilisateur :
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Cookies                (SUPPRIMABLE, mais perte connexions, suivi...)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Cookies-journal        (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\History                (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\History-journal        (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Visited Links          (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Downloads              (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\DownloadMetadata       (SUPPRIMABLE)
+# Ces suppressions entraînent la disparition de l historique, cookies, téléchargements récents, listes de liens visités, etc.
+
+# Préférences, favoris, et données essentielles (À CONSERVER) :
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Preferences            (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Top Sites              (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Login Data             (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Web Data               (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Bookmarks              (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Favicons               (À CONSERVER)
+# Ces fichiers gèrent favoris, mdp enregistrés, préférences personnelles, infos de formulaires, icônes, etc.
+
+# Extensions, logs, rapports (SUPPRIMABLE ou RÉSÉRVER, selon usage) :
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Extensions\                    (À CONSERVER si tu veux garder extensions installées)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Extension State\               (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Extension Cookies              (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Collections\                   (À CONSERVER si tu utilises cette fonctionnalité)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Crashpad\                      (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Reporting and NEL\             (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\SSLErrorAssistant              (SUPPRIMABLE)
+
+# Notifications et sessions (SUPPRIMABLE mais perte de sessions ouvertes) :
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\PlatformNotifications\          (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Profile Path                   (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Current Session                (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Current Tabs                   (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Last Session                   (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\<profil>\Last Tabs                      (SUPPRIMABLE)
+
+# Fichiers système Edge (À CONSERVER) :
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\Local State                 (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\First Run                   (À CONSERVER)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\Dictionaries\               (À CONSERVER si tu utilises le correcteur)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\ShaderCache\                (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\GraphiteDawnCache\          (SUPPRIMABLE)
+# C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\Crashpad\                   (SUPPRIMABLE)
+
+# Edge Legacy (Ancien, peut être supprimé si inutilisé) :
+# C:\Users\%USERNAME%\AppData\Local\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\     (SUPPRIMABLE sauf besoin spécifique)
