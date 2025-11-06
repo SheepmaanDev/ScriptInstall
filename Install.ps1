@@ -237,19 +237,26 @@ $programWingetNettoyage = @(
         name        = "Ccleaner Slim";
         packageId   = "Piriform.CCleaner.Slim";
         postInstall = { Copy-Item -Path "$dirTempConf\ccleaner.ini" -Destination "$env:Programfiles\CCleaner\" -Force }
+        source      = "winget"
     },
     @{
         name        = "CrystalDiskInfo";
         packageId   = "CrystalDewWorld.CrystalDiskInfo";
         postInstall = $null
+        source      = "winget"
     },
     @{
         name        = "MalwareBytes";
         packageId   = "Malwarebytes.Malwarebytes";
         postInstall = $null
+        source      = "winget"
     }
 )
 $appxPackages = @(
+    @{
+        Name    = "Actualités";
+        Package = "Microsoft.BingNews"
+    },
     @{
         Name    = "Outlook (new)";
         Package = "*Microsoft.OutlookForWindows*"
@@ -273,6 +280,10 @@ $appxPackages = @(
     @{
         Name    = "Twitter";
         Package = "*Twitter*"
+    },
+    @{
+        Name    = "Météo";
+        Package = "Microsoft.BingWeather"
     },
     @{
         Name    = "LinkedIn";
@@ -639,24 +650,24 @@ function InstallAndConfigChocolatey {
             # Test la version de Chocolatey
             $versionChoco = choco.exe --version
             if ($versionChoco -eq "2.5.0") {
-                Write-Host "$Global:timestamp - [INFO] - Chocolatey est à jour" -ForegroundColor White
+                Write-Host "$(Get-Timestamp) - [INFO] - Chocolatey est à jour" -ForegroundColor White
             }
             elseif ($versionChoco -lt "2.5.0") {
-                Write-Host "$Global:timestamp - [INFO] - Début de la mise à jour de Chocolatey ..." -ForegroundColor White
+                Write-Host "$(Get-Timestamp) - [INFO] - Début de la mise à jour de Chocolatey ..." -ForegroundColor White
                 try {
                     choco.exe upgrade chocolatey -y
                     if ($LASTEXITCODE -ne 0) {
                         throw "Chocolatey a échoué avec le code $LASTEXITCODE"
                     }
-                    Write-Host "$Global:timestamp - [SUCCESS] - Mise à jour de Chocolatey réussie" -ForegroundColor Green
+                    Write-Host "$(Get-Timestamp) - [SUCCESS] - Mise à jour de Chocolatey réussie" -ForegroundColor Green
                 }
                 catch {
-                    Write-Host "$Global:timestamp - [ERROR] - ERREUR : $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "$(Get-Timestamp) - [ERROR] - ERREUR : $($_.Exception.Message)" -ForegroundColor Red
                 }
             }
             else {
-                Write-Host "$Global:timestamp - [INFO] - Version de Chocolatey installé est plus recente" -ForegroundColor Cyan
-                Write-Host "$Global:timestamp - [DEBUG] - Penser à mettre à jour la version de Chocolatey dans le script" -ForegroundColor Cyan
+                Write-Host "$(Get-Timestamp) - [INFO] - Version de Chocolatey installé est plus recente" -ForegroundColor Cyan
+                Write-Host "$(Get-Timestamp) - [DEBUG] - Penser à mettre à jour la version de Chocolatey dans le script" -ForegroundColor Cyan
             }
         }
         else {
@@ -666,19 +677,19 @@ function InstallAndConfigChocolatey {
         }
     }
     catch {
-        Write-Host "$Global:timestamp - [ERROR] - ERREUR : $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "$(Get-Timestamp) - [ERROR] - ERREUR : $($_.Exception.Message)" -ForegroundColor Red
     }
 
     try {
-        Write-Host "$Global:timestamp - [INFO] - Début de l'installation de Spybot ..." -ForegroundColor White
+        Write-Host "$(Get-Timestamp) - [INFO] - Début de l'installation de Spybot ..." -ForegroundColor White
         choco.exe install spybot -y 
         if ($LASTEXITCODE -ne 0) {
             throw "Chocolatey a échoué avec le code $LASTEXITCODE"
         }
-        Write-Host "$Global:timestamp - [SUCCESS] - Installation de Spybot réussi" -ForegroundColor Green
+        Write-Host "$(Get-Timestamp) - [SUCCESS] - Installation de Spybot réussi" -ForegroundColor Green
     }
     catch {
-        Write-Host "$Global:timestamp - [ERROR] - ERREUR : $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "$(Get-Timestamp) - [ERROR] - ERREUR : $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 function UninstallSoftPreInstall {

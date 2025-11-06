@@ -1,4 +1,4 @@
-# --- --- Edge --- ---
+﻿# --- --- Edge --- ---
 $edgeProfilPath = "$env:LOCALAPPDATA\Microsoft\Edge\User Data"
 $edgeTargets = @(
     # "Cache"
@@ -89,11 +89,84 @@ $braveTargets = @(
     # "Sessions" ???
     "Network"
     "AutofillStrikeDatabase"
+    "VideoDecodeStats"
 )
 $braveTargetsRoot = @(
+    "$braveProfilPath\Crashpad"
     "$braveProfilPath\ShaderCache"
     "$braveProfilPath\GrShaderCache"
+    "$braveProfilPath\Crash Reports"
 )
+# --- --- Opera --- ---
+$operaProfilPathR = "$env:APPDATA\Opera Software\Opera Stable"
+$operaProfilPathL = "$env:LOCALAPPDATA\Opera Software\Opera Stable"
+$operaTargetsRoot = @(
+    "$operaProfilPathR\ShaderCache"
+    "$operaProfilPathR\GrShaderCache"
+)
+$operaTargetsR = @(
+    "AutofillAiModelCache"                        # Analyse AI pour autoremplissage des formulaires
+    # "AutofillStrikeDatabase"                    # "Strike" autoremplissage des formulaires
+    "blob_storage"                                # Données binaires temporaires (DL/UL de gros fichiers)
+    "Cache"                                       # Cache principal
+    # "Cache\Cache_Data"                          # Sous-dossier du cache principal, remplace/enrichit le fonctionnement classique du cache
+    "Code Cache"                                  # Cache pour les scripts JS compilés
+    "Crash Reports"                               # Rapports d'erreurs des applications
+    "GPUCache"                                    # Cache pour les GPU
+    # "databases"                                 # Bases de données des apps Web (pour du offline(mail,prise de note, etc) ou save de jeux)
+    "DawnCache"                                   # Cache pour le rendu graphique avec Dawn
+    "DawnGraphiteCache"                           # Cache pour le rendu graphique avec Dawn (Graphite)
+    "DawnWebGPUCache"                             # Cache pour le rendu graphique avec Dawn (WebGPU)
+    "Download Service"                            # Cache des DL en cours/pause
+    # "File System" ??? /!\                       # OldBDD pour stockage offline (projets non synchronisés, brouillons, fichiers cloud pas re-synchronisés, etc) | Remplacé par IndexedDB ou localStorage
+    # "IndexedDB" ???                             # BDD apps Web (pour du offline(mail,prise de note, etc) ou save de jeux, id de session, preferences utilisateur, options de langue, etc)
+    # "Local Storage" ???                         # BDD apps Web (pour du offline(mail,prise de note, etc) ou save de jeux, id de session, preferences utilisateur, options de langue, etc)
+    "Media Cache"                                 # Cache pour les médias (images, vidéos, etc)
+    "Network"                                     # Cache reseau (Buffers pour les recherches DNS, Données préchargées (préfetching), Caches d’en-têtes HTTP/S, etc)
+    "optimization_guide_hint_cache_store"         # Cache de regle d'optimisation Chromium
+    "optimization_guide_model_and_features_store" # Cache de model/features d'optimisation Chromium
+    # "Service Worker"
+    "Service Worker\CacheStorage"                 # Cache des Service Workers (apps Web[PWA]) (cache pour ressources offline, preferences, etc)
+    "Service Worker\ScriptCache"                  # Cache des scripts JS des Service Workers (apps Web[PWA])
+    # "Sessions" ???                              # Etat session active (onglets ouverts, les fenêtres en cours, les groupes d’onglets, et leur historique/position)
+    "Session Storage"                             # BDD apps Web (pour du offline(mail,prise de note, etc) ou save de jeux, id de session, preferences utilisateur, options de langue, etc)
+    "ShaderCache"                                 # Cache pour le rendu graphique
+    "Site Characteristics Database"               # Statistiques de site (temps de chargement, etc)
+    "WebRTC Logs"                                 # Logs WebRTC (logs de communication audio/video)
+)
+$operaTargetsL = @(
+    "cache\Cache_Data"
+    "System Cache\Cache_Data"
+)
+# $operaProfilPath = "$env:LOCALAPPDATA\Opera Software\Opera Stable"
+# $operaProfilPath = "$env:LOCALAPPDATA\Opera Software\Opera Stable"
+# $operaTargets = @(
+#     # "Cache"
+#     "Cache\Cache_Data"
+#     "Code Cache"
+#     "GPUCache"
+#     "DawnCache"
+#     "Media Cache"
+#     # "Service Worker"
+#     "Service Worker\CacheStorage"
+#     "Service Worker\ScriptCache"
+#     "Site Characteristics Database"
+#     "optimization_guide_hint_cache_store"
+#     "optimization_guide_model_and_features_store"
+#     # "Local Storage" ???
+#     "Session Storage"
+#     # "IndexedDB" ???
+#     "databases"
+#     "blob_storage"
+#     # "File System" ??? /!\
+#     "Download Service"
+#     # "Storage\ext" ???
+#     "WebRTC Logs"
+#     # "Sessions" ???
+#     "Network"
+#     "AutofillStrikeDatabase"
+# )
+
 
 # ========================================
 # CREATION DES FONCTIONS
@@ -185,6 +258,7 @@ function Show-TargetTotals($name, $targets, $color) {
 $edgeLocal = Get-ChromiumTargets $edgeProfilPath $edgeTargets
 $chromeLocal = Get-ChromiumTargets $chromeProfilPath $chromeTargets
 $braveLocal = Get-ChromiumTargets $braveProfilPath $braveTargets
+$operaLocal = Get-ChromiumTargets $operaProfilPath $operaTargets
 # --- Calculs ---
 $totals = @{
     # Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
@@ -196,9 +270,9 @@ $totals = @{
     ChromeLocal = Show-TargetTotals "Chrome Profil" $chromeLocal "Green"
     BraveRoot   = Show-TargetTotals "Brave Root" $braveTargetsRoot "Green"
     BraveLocal  = Show-TargetTotals "Brave Local" $braveLocal "Green"
-    # OperaLocal     = Show-TargetTotals "Opera Local" $operaLocal "Green"
+    OperaRoot   = Show-TargetTotals "Opera Root" $operaTargetsRoot "Green"
+    OperaLocal  = Show-TargetTotals "Opera Local" $operaLocal "Green"
     # OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
-    # OperaRoot      = Show-TargetTotals "Opera Root" $operaTargetsRoot "Green"
 }
 $allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot + $totals.BraveLocal + $totals.BraveRoot + $totals.OperaLocal + $totals.OperaRoaming + $totals.OperaRoot
 $allTotalMo = [math]::Round($allTotal / 1MB, 2)
@@ -235,58 +309,40 @@ $chromeGo = [math]::Round($totalChrome / 1GB, 2)
 $edgeGo = [math]::Round($totalEdge / 1GB, 2)
 $braveGo = [math]::Round($totalBrave / 1GB, 2)
 $operaGo = [math]::Round($totalOpera / 1GB, 2)
-$duration = (Get-Date) - $startTime
-Write-Host "$duration"
-# Write-Host "🪟🪟🪟🪟   Windows (Temp & Cache) : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $winMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $winGo) -ForegroundColor DarkGreen
-# Write-Host "🦊🦊🦊🦊   Firefox (Total)        : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $ffMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $ffGo) -ForegroundColor DarkGreen
-# Write-Host "🔵🔴🟡🟢   Chrome                 : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $chromeMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $chromeGo) -ForegroundColor DarkGreen
-# Write-Host "🌊🌊🌊🌊   Edge                   : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
-# Write-Host "🦁🦁🦁🦁   Brave                  : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
-# Write-Host "⭕⭕⭕⭕   Opera                  : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $operaMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $operaGo) -ForegroundColor DarkGreen
-# Write-Host "⭕⭕⭕⭕   Opera GX               : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
-# Write-Host "🔴🔴🔴🔴   Vivaldi                : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
-# Write-Host "`n  ─────────────────────────────────────────────────────────" -ForegroundColor DarkGray
-# Write-Host "`n📊  TOTAL GÉNÉRAL               : " -NoNewline
-# Write-Host ("{0,10} Mo" -f $totalMo) -ForegroundColor Yellow -NoNewline
-# Write-Host (" ({0:N2} Go)" -f $totalGo) -ForegroundColor DarkYellow
-# Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
-# Write-Host "║                    Analyse terminée ✓                         ║" -ForegroundColor Magenta
-# Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
-# Write-Host ""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# $duration = (Get-Date) - $startTime
+# Write-Host "$duration"
+Write-Host "🪟🪟🪟🪟   Windows (Temp & Cache) : " -NoNewline
+Write-Host ("{0,10} Mo" -f $winMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $winGo) -ForegroundColor DarkGreen
+Write-Host "🦊🦊🦊🦊   Firefox (Total)        : " -NoNewline
+Write-Host ("{0,10} Mo" -f $ffMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $ffGo) -ForegroundColor DarkGreen
+Write-Host "🔵🔴🟡🟢   Chrome                 : " -NoNewline
+Write-Host ("{0,10} Mo" -f $chromeMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $chromeGo) -ForegroundColor DarkGreen
+Write-Host "🌊🌊🌊🌊   Edge                   : " -NoNewline
+Write-Host ("{0,10} Mo" -f $edgeMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $edgeGo) -ForegroundColor DarkGreen
+Write-Host "🦁🦁🦁🦁   Brave                  : " -NoNewline
+Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+Write-Host "⭕⭕⭕⭕   Opera                  : " -NoNewline
+Write-Host ("{0,10} Mo" -f $operaMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $operaGo) -ForegroundColor DarkGreen
+Write-Host "⭕⭕⭕⭕   Opera GX               : " -NoNewline
+Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+Write-Host "🔴🔴🔴🔴   Vivaldi                : " -NoNewline
+Write-Host ("{0,10} Mo" -f $braveMo) -ForegroundColor Green -NoNewline
+Write-Host (" ({0:N2} Go)" -f $braveGo) -ForegroundColor DarkGreen
+Write-Host "`n  ─────────────────────────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "`n📊  TOTAL GÉNÉRAL               : " -NoNewline
+Write-Host ("{0,10} Mo" -f $totalMo) -ForegroundColor Yellow -NoNewline
+Write-Host (" ({0:N2} Go)" -f $totalGo) -ForegroundColor DarkYellow
+Write-Host "`n╔═══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
+Write-Host "║                    Analyse terminée ✓                         ║" -ForegroundColor Magenta
+Write-Host "╚═══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
+Write-Host ""
 
 
 
@@ -364,3 +420,21 @@ Write-Host "$duration"
 
 # Edge Legacy (Ancien, peut être supprimé si inutilisé) :
 # C:\Users\%USERNAME%\AppData\Local\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\     (SUPPRIMABLE sauf besoin spécifique)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

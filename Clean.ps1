@@ -115,12 +115,12 @@ $edgeTargetsL = @(
 $firefoxPathR = "$env:APPDATA\Mozilla\Firefox\Profiles"
 $firefoxPathL = "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles"
 $firefoxTargetsR = @(
-    "storage\default\https+++*"
+    "storage\default\https+++*" 
     "cookies.sqlite"
-    "places.sqlite"
+    #"places.sqlite"             # Historique, téléchargements, favoris (supprimer = perte historique/favoris)
 )
 $firefoxTargetsL = @(
-    "cache2\entries"
+    "cache2"
     "jumpListCache"
     "startupCache"
     "offlineCache"
@@ -317,7 +317,7 @@ $braveLocal = Get-ChromiumTargets $bravePath $braveTargetsL
 
 # --- Calculs ---
 $totals = @{
-    # Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
+    Windows   = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
     # FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
     # FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
     # ChromeLocal    = Show-TargetTotals "Chrome Local" $chromeLocal "Green"
