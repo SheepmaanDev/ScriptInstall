@@ -9,6 +9,39 @@ if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 # ========================================
 # DEFINITION VARIABLES ET LISTES
 # ========================================
+$localLowPath = Join-Path -Path $env:USERPROFILE -ChildPath "AppData\LocalLow"
+$programFilesX86 = $env:ProgramFiles + " (x86)"
+# ====================================
+# Applications
+# ====================================
+# --- --- Adobe Acrobat --- ---
+$adobePath = "$LocalLowPath\Adobe\Acrobat\DC"
+$adobePathWeb = "$LocalLowPath\Adobe\AcroCef\DC"
+$adobeTargets = @(
+    "$adobePath\ConnectorIcons",
+    "$adobePathWeb\Acrobat\Cache\Cache",
+    "$adobePathWeb\Acrobat\Cache\Code Cache"
+)
+# --- --- Node.js --- ---
+$nodeCachePath = "$env:LOCALAPPDATA\npm-cache"
+$nodeTargets = @(
+    $nodeCachePath
+)
+# --- --- OneDrive --- --- 
+$onedrivePathInst = "$env:LOCALAPPDATA\Microsoft\OneDrive\setup\logs"
+$onedrivePathSync = "$env:LOCALAPPDATA\Microsoft\OneDrive\logs\ListSync\Business1"
+$onedriveTargets = @(
+    $onedrivePathInst,
+    $onedrivePathSync
+)
+# --- --- Steam --- ---
+$steamPath = "$programFilesX86\Steam\Logs"
+$steamTargets = @(
+    "$steamPath"
+)
+# ====================================
+# Navigateurs
+# ====================================
 # --- --- Brave --- ---
 $braveProfilPath = "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data"
 # --- --- Edge --- ---
@@ -38,26 +71,6 @@ $operaGxProfilPathR = "$env:APPDATA\Opera Software\Opera GX Stable"
 $operaGxProfilPath = "$env:LOCALAPPDATA\Opera Software\Opera GX Stable"
 # --- --- Vivaldi --- ---
 $vivaldiProfilPath = "$env:LOCALAPPDATA\Vivaldi\User Data"
-
-# --- --- Windows --- ---
-$localLowPath = Join-Path -Path $env:USERPROFILE -ChildPath "AppData\LocalLow"
-$winTargets = @(
-    "$env:TEMP",
-    "$env:WINDIR\Temp",
-    "$env:WINDIR\Logs\CBS",
-    "$env:WINDIR\Prefetch",
-    "$env:WINDIR\WinSxS\Temp",
-    "$env:WINDIR\LiveKernelReports",
-    "$env:WINDIR\Downloaded Program Files",
-    "$env:WINDIR\SoftwareDistribution\Download",
-    "$env:PROGRAMDATA\Microsoft\Windows\Caches",
-    "$env:LOCALAPPDATA\CrashDumps",
-    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
-    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
-    "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*",
-    "$localLowPath\Microsoft\CryptnetUrlCache\Content",
-    "$localLowPath\Microsoft\CryptnetUrlCache\MetaData"
-)
 # --- --- Chromium --- ---
 $chromiumTargets = @(
     "AutofillAiModelCache",                        # Analyse AI pour autoremplissage des formulaires
@@ -99,6 +112,26 @@ $chromiumTargetsRoot = @(
     "Crash Reports",
     "ShaderCache",
     "GrShaderCache"
+)
+# ====================================
+# Windows
+# ====================================
+$winTargets = @(
+    "$env:TEMP",
+    "$env:WINDIR\Temp",
+    "$env:WINDIR\Logs\CBS",
+    "$env:WINDIR\Prefetch",
+    "$env:WINDIR\WinSxS\Temp",
+    "$env:WINDIR\LiveKernelReports",
+    "$env:WINDIR\Downloaded Program Files",
+    "$env:WINDIR\SoftwareDistribution\Download",
+    "$env:PROGRAMDATA\Microsoft\Windows\Caches",
+    "$env:LOCALAPPDATA\CrashDumps",
+    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
+    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
+    "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*",
+    "$localLowPath\Microsoft\CryptnetUrlCache\Content",
+    "$localLowPath\Microsoft\CryptnetUrlCache\MetaData"
 )
 
 # ========================================
@@ -204,96 +237,6 @@ function Show-TargetTotals($name, $targets, $color) {
     
     return $total
 }
-# ========================================
-# EXECUTION DES FONCTIONS
-# ========================================
-$startTime = Get-Date
-$edgeRoot = Get-ChromiumRootTargets $edgeProfilPath $chromiumTargetsRoot
-$edgeRoot = Get-ChromiumRootTargets $edgeProfilPath $chromiumTargetsRoot
-$edgeLocal = Get-ChromiumTargets $edgeProfilPath $chromiumTargets
-$chromeRoot = Get-ChromiumRootTargets $chromeProfilPath $chromiumTargetsRoot
-$chromeLocal = Get-ChromiumTargets $chromeProfilPath $chromiumTargets
-$braveRoot = Get-ChromiumRootTargets $braveProfilPath $chromiumTargetsRoot
-$braveLocal = Get-ChromiumTargets $braveProfilPath $chromiumTargets
-$operaRoot = Get-ChromiumRootTargets $operaProfilPathR $chromiumTargetsRoot
-$operaLocal = Get-ChromiumTargets $operaProfilPath $chromiumTargets
-$operaRoaming = Get-ChromiumTargets $operaProfilPathR $chromiumTargets
-$operaGXRoot = Get-ChromiumRootTargets $operaGXProfilPathR $chromiumTargetsRoot
-$operaGXLocal = Get-ChromiumTargets $operaGXProfilPath $chromiumTargets
-$operaGXRoaming = Get-ChromiumTargets $operaGXProfilPathR $chromiumTargets
-$vivaldiRoot = Get-ChromiumRootTargets $vivaldiProfilPath $chromiumTargetsRoot
-$vivaldiLocal = Get-ChromiumTargets $vivaldiProfilPath $chromiumTargets
-$firefoxRoaming = Get-FirefoxTargets $firefoxPathR $firefoxTargetsR
-$firefoxLocal = Get-FirefoxTargets $firefoxPathL $firefoxTargetsL
-# --- Calculs ---
-$totals = @{
-    Windows        = Show-TargetTotals "Windows Temp & Cache" $winTargets "Green"
-    FirefoxLocal   = Show-TargetTotals "Firefox Local" $firefoxLocal "Green"
-    FirefoxRoaming = Show-TargetTotals "Firefox Roaming" $firefoxRoaming "Green"
-    EdgeRoot       = Show-TargetTotals "Edge Root" $edgeRoot "Green"
-    EdgeLocal      = Show-TargetTotals "Edge Profil" $edgeLocal "Green"
-    ChromeRoot     = Show-TargetTotals "Chrome Root" $chromeRoot "Green"
-    ChromeLocal    = Show-TargetTotals "Chrome Profil" $chromeLocal "Green"
-    BraveRoot      = Show-TargetTotals "Brave Root" $braveRoot "Green"
-    BraveLocal     = Show-TargetTotals "Brave Local" $braveLocal "Green"
-    OperaRoot      = Show-TargetTotals "Opera Root" $operaRoot "Green"
-    OperaLocal     = Show-TargetTotals "Opera Local" $operaLocal "Green"
-    OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
-    OperaGXRoot    = Show-TargetTotals "OperaGX Root" $operaGXRoot "Green"
-    OperaGXLocal   = Show-TargetTotals "OperaGX Local" $operaGXLocal "Green"
-    OperaGXRoaming = Show-TargetTotals "OperaGX Roaming" $operaGXRoaming "Green"
-    VivaldiRoot    = Show-TargetTotals "Vivaldi Root" $vivaldiRoot "Green"
-    VivaldiLocal   = Show-TargetTotals "Vivaldi Local" $vivaldiLocal "Green"
-    # OperaRoaming   = Show-TargetTotals "Opera Roaming" $operaRoaming "Green"
-}
-$allTotal = $totals.Windows + $totals.FirefoxLocal + $totals.FirefoxRoaming + $totals.ChromeLocal + $totals.ChromeRoot + $totals.EdgeLocal + $totals.EdgeRoot + $totals.BraveLocal + $totals.BraveRoot + $totals.OperaLocal + $totals.OperaRoaming + $totals.OperaRoot
-$allTotalMo = [math]::Round($allTotal / 1MB, 2)
-# --- Affichage ---
-Write-Host "------------------------------"
-Write-Host "Total Tous Navigateurs : $allTotalMo Mo" -ForegroundColor Magenta
-Write-Host "------------------------------"
-
-
-# Calcul des totaux
-$totalWindows = Get-TotalOrZero $totals 'Windows'
-$totalFirefox = (Get-TotalOrZero $totals 'FirefoxLocal') + (Get-TotalOrZero $totals 'FirefoxRoaming')
-$totalChrome = (Get-TotalOrZero $totals 'ChromeLocal') + (Get-TotalOrZero $totals 'ChromeRoot')
-$totalEdge = (Get-TotalOrZero $totals 'EdgeLocal') + (Get-TotalOrZero $totals 'EdgeRoot')
-$totalBrave = (Get-TotalOrZero $totals 'BraveLocal') + (Get-TotalOrZero $totals 'BraveRoot')
-$totalOpera = (Get-TotalOrZero $totals 'OperaLocal') + (Get-TotalOrZero $totals 'OperaRoaming') + (Get-TotalOrZero $totals 'OperaRoot')
-$totalOperaGX = (Get-TotalOrZero $totals 'OperaGXLocal') + (Get-TotalOrZero $totals 'OperaGXRoaming') + (Get-TotalOrZero $totals 'OperaGXRoot')
-$totalVivaldi = (Get-TotalOrZero $totals 'VivaldiLocal') + (Get-TotalOrZero $totals 'VivaldiRoaming') + (Get-TotalOrZero $totals 'VivaldiRoot')
-$grandTotal = $totalWindows + $totalFirefox + $totalChrome + $totalEdge + $totalBrave + $totalOpera + $totalOperaGX + $totalVivaldi
-# Affichage formaté
-$sizesWindows = Convert-Bytes $totalWindows
-$sizesFirefox = Convert-Bytes $totalFirefox
-$sizesChrome = Convert-Bytes $totalChrome
-$sizesEdge = Convert-Bytes $totalEdge
-$sizesBrave = Convert-Bytes $totalBrave
-$sizesOpera = Convert-Bytes $totalOpera
-$sizesOperaGX = Convert-Bytes $totalOperaGX
-$sizesVivaldi = Convert-Bytes $totalVivaldi
-$sizesTotal = Convert-Bytes $grandTotal
-
-# $winMo = $sizesWindows.Mo; $winGo = $sizesWindows.Go
-# $ffMo = $sizesFirefox.Mo; $ffGo = $sizesFirefox.Go
-# $chromeMo = $sizesChrome.Mo; $chromeGo = $sizesChrome.Go
-# $edgeMo = $sizesEdge.Mo; $edgeGo = $sizesEdge.Go
-# $braveMo = $sizesBrave.Mo; $braveGo = $sizesBrave.Go
-# $operaMo = $sizesOpera.Mo; $operaGo = $sizesOpera.Go
-# $operaGXMo = $sizesOperaGX.Mo; $operaGXGo = $sizesOperaGX.Go
-# $vivaldiMo = $sizesVivaldi.Mo; $vivaldiGo = $sizesVivaldi.Go
-# $totalMo = $sizesTotal.Mo; $totalGo = $sizesTotal.Go
-$duration = (Get-Date) - $startTime
-# Write-Host "$duration"
-${durationSeconds} = [math]::Round($duration.TotalSeconds, 2)
-# --- Résumé final (cadre aligné) ---
-Write-Host ""
-$boxInner = 63
-$boxTop = "╔" + ("═" * $boxInner) + "╗"
-$boxSep = "╠" + ("═" * $boxInner) + "╣"
-$boxBottom = "╚" + ("═" * $boxInner) + "╝"
-
 function Write-BoxLine($text) {
     $padded = $text.PadRight($boxInner)
     Write-Host ("║" + $padded + "║") -ForegroundColor Magenta
@@ -301,7 +244,7 @@ function Write-BoxLine($text) {
 function Write-BoxLineWithValue($label, $valueText) {
     $valueWidth = Get-DisplayWidth $valueText
     $labelWidth = [math]::Max(0, $boxInner - $valueWidth)
-    $labelStr = PadRight-Display $label $labelWidth
+    $labelStr = Format-DisplayPad $label $labelWidth
     # Compensation spécifique pour l'emoji ⏱ (certaines consoles le comptent sur 1 colonne)
     if ($label -and $label.Contains([char]0x23F1)) { $labelStr += ' ' }
     Write-Host "║" -ForegroundColor Magenta -NoNewline
@@ -324,6 +267,13 @@ function Get-DisplayWidth($text) {
         # Quelques symboles unicode larges simples
         $code = [int][char]$ch
         if (
+            $code -eq 0x200D -or # Zero Width Joiner
+            ($code -ge 0xFE00 -and $code -le 0xFE0F) # Variation Selectors
+        ) {
+            $i += 1
+            continue
+        }
+        if (
             ($code -ge 0x1100) -or 
             ($code -ge 0x2600 -and $code -le 0x27FF) -or 
             ($code -ge 0x2300 -and $code -le 0x23FF)
@@ -337,7 +287,7 @@ function Get-DisplayWidth($text) {
     }
     return $width
 }
-function PadRight-Display($text, $totalWidth) {
+function Format-DisplayPad($text, $totalWidth) {
     $current = Get-DisplayWidth $text
     if ($current -eq $totalWidth) { return $text }
     if ($current -lt $totalWidth) {
@@ -367,25 +317,128 @@ function Write-BoxRow($label, $mo, $go) {
     $numbersText = ("{0,10:N2} Mo  ({1,6:N2} Go) " -f $mo, $go)
     $numbersWidth = Get-DisplayWidth $numbersText
     $labelWidth = [math]::Max(0, $boxInner - $numbersWidth)
-    $labelStr = PadRight-Display $label $labelWidth
+    $labelStr = Format-DisplayPad $label $labelWidth
 
     Write-Host "║" -ForegroundColor Magenta -NoNewline
     Write-Host $labelStr -NoNewline
     Write-Host $numbersText -NoNewline -ForegroundColor Green
     Write-Host "║" -ForegroundColor Magenta
 }
+# ========================================
+# EXECUTION DES FONCTIONS
+# ========================================
+$startTime = Get-Date
+# ====================================
+# Applications
+# ====================================
+$adobeLocal = $adobeTargets
+# ====================================
+# Navigateurs
+# ====================================
+$edgeRoot = Get-ChromiumRootTargets $edgeProfilPath $chromiumTargetsRoot
+$edgeLocal = Get-ChromiumTargets $edgeProfilPath $chromiumTargets
+$chromeRoot = Get-ChromiumRootTargets $chromeProfilPath $chromiumTargetsRoot
+$chromeLocal = Get-ChromiumTargets $chromeProfilPath $chromiumTargets
+$braveRoot = Get-ChromiumRootTargets $braveProfilPath $chromiumTargetsRoot
+$braveLocal = Get-ChromiumTargets $braveProfilPath $chromiumTargets
+$operaRoot = Get-ChromiumRootTargets $operaProfilPathR $chromiumTargetsRoot
+$operaLocal = Get-ChromiumTargets $operaProfilPath $chromiumTargets
+$operaRoaming = Get-ChromiumTargets $operaProfilPathR $chromiumTargets
+$operaGXRoot = Get-ChromiumRootTargets $operaGXProfilPathR $chromiumTargetsRoot
+$operaGXLocal = Get-ChromiumTargets $operaGXProfilPath $chromiumTargets
+$operaGXRoaming = Get-ChromiumTargets $operaGXProfilPathR $chromiumTargets
+$vivaldiRoot = Get-ChromiumRootTargets $vivaldiProfilPath $chromiumTargetsRoot
+$vivaldiLocal = Get-ChromiumTargets $vivaldiProfilPath $chromiumTargets
+$firefoxRoaming = Get-FirefoxTargets $firefoxPathR $firefoxTargetsR
+$firefoxLocal = Get-FirefoxTargets $firefoxPathL $firefoxTargetsL
 
+# --- Calculs et agrégations ---
+$targetGroups = @(
+    [pscustomobject]@{ Key = 'AdobeReader'; Name = 'Adobe Acrobat Reader'; Targets = $adobeLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'NodeCache'; Name = 'Node.js Cache'; Targets = $nodeTargets; Color = 'Green' },
+    [pscustomobject]@{ Key = 'OneDrive'; Name = 'OneDrive Logs'; Targets = $onedriveTargets; Color = 'Green' },
+    [pscustomobject]@{ Key = 'Steam'; Name = 'Steam Logs'; Targets = $steamTargets; Color = 'Green' },
+    [pscustomobject]@{ Key = 'Windows'; Name = 'Windows Temp & Cache'; Targets = $winTargets; Color = 'Green' },
+    [pscustomobject]@{ Key = 'FirefoxLocal'; Name = 'Firefox Local'; Targets = $firefoxLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'FirefoxRoaming'; Name = 'Firefox Roaming'; Targets = $firefoxRoaming; Color = 'Green' },
+    [pscustomobject]@{ Key = 'EdgeRoot'; Name = 'Edge Root'; Targets = $edgeRoot; Color = 'Green' },
+    [pscustomobject]@{ Key = 'EdgeLocal'; Name = 'Edge Profil'; Targets = $edgeLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'ChromeRoot'; Name = 'Chrome Root'; Targets = $chromeRoot; Color = 'Green' },
+    [pscustomobject]@{ Key = 'ChromeLocal'; Name = 'Chrome Profil'; Targets = $chromeLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'BraveRoot'; Name = 'Brave Root'; Targets = $braveRoot; Color = 'Green' },
+    [pscustomobject]@{ Key = 'BraveLocal'; Name = 'Brave Local'; Targets = $braveLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'OperaRoot'; Name = 'Opera Root'; Targets = $operaRoot; Color = 'Green' },
+    [pscustomobject]@{ Key = 'OperaLocal'; Name = 'Opera Local'; Targets = $operaLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'OperaRoaming'; Name = 'Opera Roaming'; Targets = $operaRoaming; Color = 'Green' },
+    [pscustomobject]@{ Key = 'OperaGXRoot'; Name = 'Opera GX Root'; Targets = $operaGXRoot; Color = 'Green' },
+    [pscustomobject]@{ Key = 'OperaGXLocal'; Name = 'Opera GX Local'; Targets = $operaGXLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'OperaGXRoaming'; Name = 'Opera GX Roaming'; Targets = $operaGXRoaming; Color = 'Green' },
+    [pscustomobject]@{ Key = 'VivaldiRoot'; Name = 'Vivaldi Root'; Targets = $vivaldiRoot; Color = 'Green' },
+    [pscustomobject]@{ Key = 'VivaldiLocal'; Name = 'Vivaldi Local'; Targets = $vivaldiLocal; Color = 'Green' }
+)
+
+$totals = @{}
+foreach ($group in $targetGroups) {
+    $totals[$group.Key] = Show-TargetTotals $group.Name $group.Targets $group.Color
+}
+
+$summaryConfig = @(
+    [pscustomobject]@{ Label = " 📄📄📄📄   Adobe Acrobat Reader   :"; Keys = @('AdobeReader'); IsBrowser = $false },
+    [pscustomobject]@{ Label = " 🟢🟢🟢🟢   Node.js                :"; Keys = @('NodeCache'); IsBrowser = $false },
+    [pscustomobject]@{ Label = " ☁️☁️☁️☁️   OneDrive               :"; Keys = @('OneDrive'); IsBrowser = $false },
+    [pscustomobject]@{ Label = " 🎮🎮🎮🎮   Steam                  :"; Keys = @('Steam'); IsBrowser = $false },
+    [pscustomobject]@{ Label = " 🪟🪟🪟🪟   Windows                :"; Keys = @('Windows'); IsBrowser = $false },
+    [pscustomobject]@{ Label = " 🦊🦊🦊🦊   Firefox                :"; Keys = @('FirefoxLocal', 'FirefoxRoaming'); IsBrowser = $true },
+    [pscustomobject]@{ Label = " 🔵🔴🟡🟢   Chrome                 :"; Keys = @('ChromeLocal', 'ChromeRoot'); IsBrowser = $true },
+    [pscustomobject]@{ Label = " 🌊🌊🌊🌊   Edge                   :"; Keys = @('EdgeLocal', 'EdgeRoot'); IsBrowser = $true },
+    [pscustomobject]@{ Label = " 🦁🦁🦁🦁   Brave                  :"; Keys = @('BraveLocal', 'BraveRoot'); IsBrowser = $true },
+    [pscustomobject]@{ Label = " ⭕⭕⭕⭕   Opera                  :"; Keys = @('OperaLocal', 'OperaRoot', 'OperaRoaming'); IsBrowser = $true },
+    [pscustomobject]@{ Label = " ⭕⭕⭕⭕   Opera GX               :"; Keys = @('OperaGXLocal', 'OperaGXRoot', 'OperaGXRoaming'); IsBrowser = $true },
+    [pscustomobject]@{ Label = " 🔴🔴🔴🔴   Vivaldi                :"; Keys = @('VivaldiLocal', 'VivaldiRoot'); IsBrowser = $true }
+)
+
+$summaryRowsData = foreach ($row in $summaryConfig) {
+    $bytes = 0
+    foreach ($key in $row.Keys) {
+        $bytes += Get-TotalOrZero $totals $key
+    }
+    $sizes = Convert-Bytes $bytes
+    [pscustomobject]@{
+        Label     = $row.Label
+        Mo        = $sizes.Mo
+        Go        = $sizes.Go
+        Bytes     = [double]$bytes
+        IsBrowser = $row.IsBrowser
+    }
+}
+
+$allTotalNavBytes = ($summaryRowsData | Where-Object { $_.IsBrowser } | Measure-Object -Property Bytes -Sum).Sum
+if ($null -eq $allTotalNavBytes) { $allTotalNavBytes = 0 }
+$navSizes = Convert-Bytes $allTotalNavBytes
+
+$grandTotalBytes = ($summaryRowsData | Measure-Object -Property Bytes -Sum).Sum
+if ($null -eq $grandTotalBytes) { $grandTotalBytes = 0 }
+$sizesTotal = Convert-Bytes $grandTotalBytes
+
+$duration = (Get-Date) - $startTime
+${durationSeconds} = [math]::Round($duration.TotalSeconds, 2)
+
+# --- Affichage ---
+Write-Host "------------------------------"
+Write-Host ("Total de tous les navigateurs : {0:N2} Mo ({1:N2} Go)" -f $navSizes.Mo, $navSizes.Go) -ForegroundColor Magenta
+Write-Host "------------------------------"
+# --- Résumé final (cadre aligné) ---
+Write-Host ""
+$boxInner = 63
+$boxTop = "╔" + ("═" * $boxInner) + "╗"
+$boxSep = "╠" + ("═" * $boxInner) + "╣"
+$boxBottom = "╚" + ("═" * $boxInner) + "╝"
 Write-Host $boxTop -ForegroundColor Magenta
 Write-BoxLine "                     RÉSUMÉ DE L'ANALYSE"
 Write-Host $boxSep -ForegroundColor Magenta
-Write-BoxRow " 🪟🪟🪟🪟   Windows (Temp & Cache) :" $sizesWindows.Mo $sizesWindows.Go
-Write-BoxRow " 🦊🦊🦊🦊   Firefox (Total)        :" $sizesFirefox.Mo $sizesFirefox.Go
-Write-BoxRow " 🔵🔴🟡🟢   Chrome                 :" $sizesChrome.Mo $sizesChrome.Go
-Write-BoxRow " 🌊🌊🌊🌊   Edge                   :" $sizesEdge.Mo $sizesEdge.Go
-Write-BoxRow " 🦁🦁🦁🦁   Brave                  :" $sizesBrave.Mo $sizesBrave.Go
-Write-BoxRow " ⭕⭕⭕⭕   Opera                  :" $sizesOpera.Mo $sizesOpera.Go
-Write-BoxRow " ⭕⭕⭕⭕   Opera GX               :" $sizesOperaGX.Mo $sizesOperaGX.Go
-Write-BoxRow " 🔴🔴🔴🔴   Vivaldi                :" $sizesVivaldi.Mo $sizesVivaldi.Go
+foreach ($row in $summaryRowsData) {
+    Write-BoxRow $row.Label $row.Mo $row.Go
+}
 Write-Host $boxSep -ForegroundColor Magenta
 Write-BoxRow " 📊 TOTAL GÉNÉRAL                  :" $sizesTotal.Mo $sizesTotal.Go
 Write-BoxLineWithValue " ⏱  TEMPS D'EXÉCUTION              :"  ("{0:N2} s " -f $durationSeconds)
