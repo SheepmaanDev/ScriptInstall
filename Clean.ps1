@@ -133,7 +133,6 @@ $winTargets = @(
     "$localLowPath\Microsoft\CryptnetUrlCache\Content",
     "$localLowPath\Microsoft\CryptnetUrlCache\MetaData"
 )
-
 # ========================================
 # CREATION DES FONCTIONS
 # ========================================
@@ -172,37 +171,28 @@ function Get-FolderSize($path) {
     }
     catch { return 0 }
 }
-# Fonction pour Firefox (qui a un dossier Profiles)
 function Get-FirefoxTargets($profilesRoot, $targetPaths) {
     if (-not (Test-Path $profilesRoot)) { return @() }
-    
     $targets = @()
-    # Firefox: tous les dossiers dans Profiles
     $profiles = Get-ChildItem -Path $profilesRoot -Directory -ErrorAction SilentlyContinue
-    
     foreach ($profil in $profiles) {
         foreach ($targetPath in $targetPaths) {
             $targets += Join-Path $profil.FullName $targetPath
         }
     }
-    
     return $targets
 }
-# Fonction pour Chrome/Edge (qui ont User Data avec Default et Profile *)
 function Get-ChromiumTargets($userDataRoot, $targetPaths) {
     if (-not (Test-Path $userDataRoot)) { return @() }
-    
     $targets = @()
     # Chrome/Edge: chercher Default et Profile *
     $profiles = Get-ChildItem -Path $userDataRoot -Directory -ErrorAction SilentlyContinue | 
     Where-Object { $_.Name -eq "Default" -or $_.Name -like "Profile *" }
-    
     foreach ($profil in $profiles) {
         foreach ($targetPath in $targetPaths) {
             $targets += Join-Path $profil.FullName $targetPath
         }
     }
-    
     return $targets
 }
 function Get-ChromiumRootTargets($userDataRoot, $rootNames) {
@@ -329,10 +319,6 @@ function Write-BoxRow($label, $mo, $go) {
 # ========================================
 $startTime = Get-Date
 # ====================================
-# Applications
-# ====================================
-$adobeLocal = $adobeTargets
-# ====================================
 # Navigateurs
 # ====================================
 $edgeRoot = Get-ChromiumRootTargets $edgeProfilPath $chromiumTargetsRoot
@@ -354,7 +340,7 @@ $firefoxLocal = Get-FirefoxTargets $firefoxPathL $firefoxTargetsL
 
 # --- Calculs et agrégations ---
 $targetGroups = @(
-    [pscustomobject]@{ Key = 'AdobeReader'; Name = 'Adobe Acrobat Reader'; Targets = $adobeLocal; Color = 'Green' },
+    [pscustomobject]@{ Key = 'AdobeReader'; Name = 'Adobe Acrobat Reader'; Targets = $adobeTargets; Color = 'Green' },
     [pscustomobject]@{ Key = 'NodeCache'; Name = 'Node.js Cache'; Targets = $nodeTargets; Color = 'Green' },
     [pscustomobject]@{ Key = 'OneDrive'; Name = 'OneDrive Logs'; Targets = $onedriveTargets; Color = 'Green' },
     [pscustomobject]@{ Key = 'Steam'; Name = 'Steam Logs'; Targets = $steamTargets; Color = 'Green' },
